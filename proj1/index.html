@@ -1,7 +1,225 @@
-<html>
-	<head>
-	</head>
-	<body>
-		Project 1 here
-	</body>
-</html>
+<h1 id="overview">Overview</h1>
+<p>In this report, we do the rasterization of triangles of multiple steps.</p>
+<ul>
+<li><p>Part 1: Implemented the rasterization of a triangle with a single color.</p></li>
+<li><p>Part 2: Implemented supersampling, that is, for a single pixel location in the framebuffer, we sample multiple points around the pixel location that output the average of the sampled colors.</p></li>
+<li><p>Part 3: Implemented transformation matrices in homogeneous coordinates. This allows use to implement a hierarchical representation of objects in the world space.</p></li>
+<li><p>Part 4: Implemented the rasterization of a triangle with interpolated color from the vertices. This uses the barycentric coordinates of the triangle to facilitate the interpolation.</p></li>
+<li><p>Part 5: Implemented the rasterization of a triangle from a predefined texture image. Multiple options in identifying the color is used, including:</p>
+<ul>
+<li><p>Nearest: Sample the color from the nearest texel.</p></li>
+<li><p>Linear: Bilinear interpolation of the color from the four nearest texels.</p></li>
+</ul></li>
+<li><p>Part 6: Implemented the Mipmap: consideration the effect of minification of texture image in the rendered image. Multiple option in identifying the color is used, including:</p>
+<ul>
+<li><p>Zero: Always is use Level 0 Mipmap.</p></li>
+<li><p>Nearest: Sample the color from the nearest integer level.</p></li>
+<li><p>Linear: Linear interpolation of the color from the two nearest levels.</p>
+<p>Note that is bilinear interpolation in the texture image is used, then the method of rasterization is defined as the trilinear interpolation.</p></li>
+</ul></li>
+</ul>
+<p>Overall, in this project, the combination of 6 rasterization techniques with supersampling, sampling from the texture space, and Mipmap is implemented.</p>
+<h1 id="task-1-drawing-single-color-triangles">Task 1: Drawing Single-Color Triangles</h1>
+<p>In this task, it is aimed to draw a single-color triangle in the framebuffer. The algorithm is described as follows:</p>
+<ol>
+<li><p>Define the bounding box as the following region: <span class="math display">[<em>x</em><sub><em>l</em></sub> = min (<em>x</em><sub>0</sub>, <em>x</em><sub>1</sub>, <em>x</em><sub>2</sub>), <em>x</em><sub><em>r</em></sub> = max (<em>x</em><sub>0</sub>, <em>x</em><sub>1</sub>, <em>x</em><sub>2</sub>)] × [<em>y</em><sub><em>t</em></sub> = min (<em>y</em><sub>0</sub>, <em>y</em><sub>1</sub>, <em>y</em><sub>2</sub>), <em>y</em><sub><em>b</em></sub> = max (<em>y</em><sub>0</sub>, <em>y</em><sub>1</sub>, <em>y</em><sub>2</sub>)]</span></p>
+<p>All the points that lies within the triangle are inside this bounding box. Therefore, the only pixels are we need to identify are those that lie in this region, particularly: <span class="math display">[<em>f</em><em>l</em><em>o</em><em>o</em><em>r</em>(<em>x</em><sub><em>l</em></sub>), <em>c</em><em>e</em><em>i</em><em>l</em>(<em>x</em><sub><em>r</em></sub>)] × [<em>f</em><em>l</em><em>o</em><em>o</em><em>r</em>(<em>y</em><sub><em>t</em></sub>), <em>c</em><em>e</em><em>i</em><em>l</em>(<em>y</em><sub><em>b</em></sub>)]</span></p></li>
+<li><p>Then we can calculate the line equations that bounds the triangle. That is given by the following: <span class="math inline">∀<em>i</em> ∈ ℕ(3)</span> with <span class="math inline">mod 3</span> arithmetic. <span class="math display"><em>L</em><sub><em>i</em></sub>(<em>x</em>, <em>y</em>) =  − (<em>x</em> − <em>x</em><sub><em>i</em></sub>)(<em>y</em><sub><em>i</em> + 1</sub> − <em>y</em><sub><em>i</em></sub>) + (<em>y</em> − <em>y</em><sub><em>i</em></sub>)(<em>x</em><sub><em>i</em> + 1</sub> − <em>x</em><sub><em>i</em></sub>)</span></p>
+<p>If the points <span class="math inline">(<em>x</em>, <em>y</em>) ∈ ℝ<sup>2</sup></span> satisfies <span class="math inline"><em>L</em><sub><em>i</em></sub>(<em>x</em>, <em>y</em>) &gt; 0</span> lives on one side of the line and so does <span class="math inline"><em>L</em><sub><em>i</em></sub>(<em>x</em>, <em>y</em>) &lt; 0</span>.</p></li>
+<li><p>The triangle might be either positively orientation or negatively oriented. In order to incorporate the orientation of the triangle, we calculate the following: <span class="math inline">∀<em>i</em> ∈ ℕ(3)</span> with <span class="math inline">mod 3</span> arithmetic, if point <span class="math inline">(<em>x</em>, <em>y</em>) ∈ ℝ<sup>2</sup></span> lies in the triangle, then <span class="math inline"><em>L</em><sub><em>i</em></sub>(<em>x</em>, <em>y</em>)</span> must have the same sign (or zero) as <span class="math inline"><em>L</em><sub><em>i</em></sub>(<em>x</em><sub><em>i</em> + 2</sub>, <em>y</em><sub><em>i</em> + 2</sub>)</span>. Therefore, <span class="math inline"><em>L</em><sub><em>i</em></sub>(<em>x</em>, <em>y</em>)<em>L</em><sub><em>i</em></sub>(<em>x</em><sub><em>i</em> + 2</sub>, <em>y</em><sub><em>i</em> + 2</sub>) ≥ 0</span>, then the points is on the same side of line <span class="math inline"><em>i</em></span> with its opposite vertex <span class="math inline"><em>i</em> + 2</span>. Therefore, if for all <span class="math inline"><em>i</em></span> this is satisfies then the pixel is within the triangle.</p></li>
+<li><p>Once the pixel is within the triangle, it is assigned with the predefined color.</p></li>
+</ol>
+<p>We note that this algorithm only iterates the pixel within the bounding box. Therefore, it is not needed to iterate through the whole framebuffer. Thus, our algorithm is no worse than one that checks each sample within the bounding box of the triangle.</p>
+<p>An image of the rendering of <code>basic/test4.svg</code> is included as Fig.<a href="#fig:t1_img" data-reference-type="ref" data-reference="fig:t1_img">1</a>.</p>
+<figure>
+<img src="CS 184 HW1 Task1 Image.png" id="fig:t1_img" style="width:80.0%" alt="Task 1 rendering of basic/test4.svg. The zoomed part is around the center of the red triangle. " /><figcaption aria-hidden="true">Task 1 rendering of <code>basic/test4.svg</code>. The zoomed part is around the center of the red triangle. </figcaption>
+</figure>
+<h1 id="task-2-supersampling">Task 2: Supersampling</h1>
+<p>In this section, supersampling is implemented. The following algorithm is implemented:</p>
+<ol>
+<li><p>The sample buffer contains the color corresponding to each subpixel. Therefore, the size of the framebuffer is given by: <code>width * height * sample_rate</code>.</p></li>
+<li><p>For every subpixel inside the bounding box, perform the same step as in the rasterization of a single-color triangle.</p></li>
+<li><p>To release the sample buffer to the framebuffer, simply compute the average of color of subpixels within a pixel, and put it into the corresponding spot in the framebuffer.</p></li>
+</ol>
+<p>Images of the rendering of <code>basic/test4.svg</code> with supersampling rate 1, 4, 16 are included as Fig.<a href="#fig:t2_img_supersampling_1" data-reference-type="ref" data-reference="fig:t2_img_supersampling_1">2</a>, Fig.<a href="#fig:t2_img_supersampling_4" data-reference-type="ref" data-reference="fig:t2_img_supersampling_4">3</a>, and Fig.<a href="#fig:t2_img_supersampling_16" data-reference-type="ref" data-reference="fig:t2_img_supersampling_16">4</a>, respectively. All of them are zoomed in around the right tip of the red triangle.</p>
+<figure>
+<img src="CS 184 HW1 Task2 Image Supersampling 1.png" id="fig:t2_img_supersampling_1" style="width:80.0%" alt="Task 2 rendering of basic/test4.svg. The zoomed part is around the right tip of the red triangle. Supersampling rate is 1. " /><figcaption aria-hidden="true">Task 2 rendering of <code>basic/test4.svg</code>. The zoomed part is around the right tip of the red triangle. Supersampling rate is <span class="math inline">1</span>. </figcaption>
+</figure>
+<figure>
+<img src="CS 184 HW1 Task2 Image Supersampling 4.png" id="fig:t2_img_supersampling_4" style="width:80.0%" alt="Task 2 rendering of basic/test4.svg. The zoomed part is around the right tip of the red triangle. Supersampling rate is 4. " /><figcaption aria-hidden="true">Task 2 rendering of <code>basic/test4.svg</code>. The zoomed part is around the right tip of the red triangle. Supersampling rate is <span class="math inline">4</span>. </figcaption>
+</figure>
+<figure>
+<img src="CS 184 HW1 Task2 Image Supersampling 16.png" id="fig:t2_img_supersampling_16" style="width:80.0%" alt="Task 2 rendering of basic/test4.svg. The zoomed part is around the right tip of the red triangle. Supersampling rate is 16. " /><figcaption aria-hidden="true">Task 2 rendering of <code>basic/test4.svg</code>. The zoomed part is around the right tip of the red triangle. Supersampling rate is <span class="math inline">16</span>. </figcaption>
+</figure>
+<h1 id="task-3-transformation">Task 3: Transformation</h1>
+<p>In this section, the transformation matrix in homogeneous coordinate is implemented.</p>
+<ul>
+<li><p>Translation by <span class="math inline">(<em>t</em><sub><em>x</em></sub>, <em>t</em><sub><em>y</em></sub>) ∈ ℝ<sup>2</sup></span>: <span class="math display">$$T(t_x, t_y) = \begin{bmatrix}
+    1 &amp; 0 &amp; t_x \\
+    0 &amp; 1 &amp; t_y \\
+    0 &amp; 0 &amp; 1
+    \end{bmatrix}$$</span></p></li>
+<li><p>Scale by <span class="math inline">(<em>s</em><sub><em>x</em></sub>, <em>s</em><sub><em>y</em></sub>) ∈ ℝ<sup>2</sup></span>: <span class="math display">$$S(s_x, s_y) = \begin{bmatrix}
+    s_x &amp; 0 &amp; 0 \\ 0 &amp; s_y &amp; 0 \\ 0 &amp; 0 &amp; 1
+    \end{bmatrix}$$</span></p></li>
+<li><p>Rotation by angle <span class="math inline"><em>θ</em> ∈ ℝ</span> counterclockwise: <span class="math display">$$R(\theta) = \begin{bmatrix}
+    \cos(\theta) &amp; -\sin(\theta) &amp; 0 \\
+    \sin(\theta) &amp; \cos(\theta) &amp; 0 \\
+    0 &amp; 0 &amp; 1\\
+    \end{bmatrix}$$</span></p></li>
+</ul>
+<p>The rendering of <code>transforms/robot.svg</code> is included as Fig.<a href="#fig:t3_img" data-reference-type="ref" data-reference="fig:t3_img">5</a>.</p>
+<p>The rendering of <code>transforms/my_robot.svg</code> is included as Fig.<a href="#fig:t3_my_img" data-reference-type="ref" data-reference="fig:t3_my_img">6</a>. The figure is perform ballet in green shirt. Major changes are:</p>
+<ul>
+<li><p>Add rotation by 90 degrees on part of the small arm.</p></li>
+<li><p>Add rotation by 90 degrees on part of the left leg.</p></li>
+<li><p>Changed color of the torso.</p></li>
+<li><p>Change rotation angle of the head.</p></li>
+<li><p>Removed a polygon on the right leg.</p></li>
+</ul>
+<figure>
+<img src="CS 184 HW1 Task3 Image.png" id="fig:t3_img" style="width:80.0%" alt="Task 3 rendering of transforms/robot.svg. " /><figcaption aria-hidden="true">Task 3 rendering of <code>transforms/robot.svg</code>. </figcaption>
+</figure>
+<figure>
+<img src="CS 184 HW1 Task3 Image my.png" id="fig:t3_my_img" style="width:80.0%" alt="Task 3 rendering of transforms/my_robot.svg. The figure is performing ballet. " /><figcaption aria-hidden="true">Task 3 rendering of <code>transforms/my_robot.svg</code>. The figure is performing ballet. </figcaption>
+</figure>
+<h1 id="task-4-barycentric-coordinate">Task 4: Barycentric Coordinate</h1>
+<p>In this section, the rasterization of a triangle with interpolated color is implemented. Suppose a triangle has vertices at <span class="math inline">(<em>x</em><sub>0</sub>, <em>y</em><sub>0</sub>), (<em>x</em><sub>1</sub>, <em>y</em><sub>1</sub>), (<em>x</em><sub>2</sub>, <em>y</em><sub>2</sub>) ∈ ℝ<sup>2</sup></span>. Then a point <span class="math inline">(<em>x</em>, <em>y</em>) ∈ ℝ<sup>2</sup></span> has barycentric coordinate of the triangle <span class="math inline">(<em>α</em>, <em>β</em>, <em>γ</em>) ∈ ℝ<sup>3</sup></span> defined as: <span class="math display">$$\begin{bmatrix}
+x \\ y \\ 1
+\end{bmatrix}
+=
+\begin{bmatrix}
+x_0 &amp; x_1 &amp; x_2 \\ y_0 &amp; y_1 &amp; y_2 \\ 1 &amp; 1 &amp; 1
+\end{bmatrix}
+\begin{bmatrix}
+\alpha \\ \beta \\ \gamma
+\end{bmatrix}$$</span></p>
+<p>It could be equivalently given as the following: suppose <span class="math inline"><em>L</em><sub><em>i</em></sub></span> is the line equation as defined in Task 1. Then <span class="math display">$$\begin{dcases}
+\alpha = \frac{L_1(x,y)}{L_1(x_0,y_0)} \\
+\beta = \frac{L_2(x,y)}{L_2(x_1,y_1)} \\
+\gamma = \frac{L_0(x,y)}{L_0(x_2,y_2)}
+\end{dcases}$$</span></p>
+<p>Therefore, the interpolated color is by a weighted sum of the color at vertex 0, 1, 2 by weight <span class="math inline"><em>α</em></span>, <span class="math inline"><em>β</em></span>, and <span class="math inline"><em>γ</em></span>. A illustration of the barycentric coordinate is included as Fig.<a href="#fig:t4_demo" data-reference-type="ref" data-reference="fig:t4_demo">7</a>, with the color represents the barycentric coordinate of the point.</p>
+<figure>
+<img src="CS 184 HW1 Task4 Img Demo.png" id="fig:t4_demo" style="width:80.0%" alt="Barycentric coordinate illustration. The color represents the barycentric coordinate within the triangle. " /><figcaption aria-hidden="true">Barycentric coordinate illustration. The color represents the barycentric coordinate within the triangle. </figcaption>
+</figure>
+<p>The rendering of <code>basic/test7.svg</code> is included as Fig.<a href="#fig:t4_img" data-reference-type="ref" data-reference="fig:t4_img">8</a>.</p>
+<figure>
+<img src="CS 184 HW1 Task4 Img.png" id="fig:t4_img" style="width:80.0%" alt="Task 4 rendering of basic/test7.svg. " /><figcaption aria-hidden="true">Task 4 rendering of <code>basic/test7.svg</code>. </figcaption>
+</figure>
+<h1 id="part-5-texture-sampling">Part 5: Texture sampling</h1>
+<p>In this section, the color of a pixel is obtained from a corresponding texture image. The algorithm is as follows:</p>
+<ol>
+<li><p>For each point in the sample buffer, as in supersampling, compute the barycentric coordinate <span class="math inline">(<em>α</em>, <em>β</em>, <em>γ</em>)</span> as in Task 4.</p></li>
+<li><p>Find the texture space coordinate of the barycentric coordinate computed that is: <span class="math display">$$\begin{dcases}
+    u = \alpha u_0 + \beta u_1 + \gamma u_2 \\
+    v = \alpha v_0 + \beta v_1 + \gamma v_2
+    \end{dcases}$$</span></p></li>
+<li><p>Use either nearest texel approach or a bilinear interpolation to determine the texel color at <span class="math inline">(<em>u</em>, <em>v</em>)</span>.</p>
+<p>For the nearest texel approach:</p>
+<ol>
+<li><p>The nearest texel of point <span class="math inline">(<em>u</em>, <em>v</em>)</span> in the texture space is given by <span class="math inline">(<em>u</em>′, <em>v</em>′) = (<em>f</em><em>l</em><em>o</em><em>o</em><em>r</em>(<em>u</em>)), <em>f</em><em>l</em><em>o</em><em>o</em><em>r</em>(<em>v</em>)</span>.</p></li>
+<li><p>Therefore, fill the corresponding sample buffer with color of texel <span class="math inline">(<em>u</em>′, <em>v</em>′)</span></p></li>
+</ol>
+<p>For the bilinear interpolation:</p>
+<ol>
+<li><p><span class="math inline">(<em>u</em>, <em>v</em>)</span> must lies in a region between the 4 nearest texel location:</p>
+<p><span class="math inline">(<em>u</em><sub><em>l</em></sub>, <em>v</em><sub><em>t</em></sub>), (<em>u</em><sub><em>r</em></sub>, <em>v</em><sub><em>t</em></sub>), (<em>u</em><sub><em>l</em></sub>, <em>v</em><sub><em>b</em></sub>), (<em>u</em><sub><em>r</em></sub>, <em>v</em><sub><em>b</em></sub>) ∈ ℕ<sup>2</sup></span> where <span class="math inline"><em>u</em><sub><em>l</em></sub> + 0.5 ≤ <em>u</em> &lt; <em>u</em><sub><em>r</em></sub> + 0.5</span> and <span class="math inline"><em>v</em><sub><em>t</em></sub> + 0.5 ≤ <em>v</em> &lt; <em>v</em><sub><em>b</em></sub> + 0.5</span>.</p></li>
+<li><p>Therefore, perform bilinear interpolation of the color at the four pixel to conclude a weighted averaged color at point <span class="math inline">(<em>u</em>, <em>v</em>)</span>.</p></li>
+<li><p>Finally, fill the corresponding sample buffer with the color calculated.</p></li>
+</ol></li>
+</ol>
+<p>Some sample rendering from <code>texmap/test5.svg</code> are included below.</p>
+<ul>
+<li><p>Fig.<a href="#fig:t5_img_nearest_supersampling_1" data-reference-type="ref" data-reference="fig:t5_img_nearest_supersampling_1">9</a>: Nearest texture sampling with supersampling rate 1.</p></li>
+<li><p>Fig.<a href="#fig:t5_img_nearest_supersampling_16" data-reference-type="ref" data-reference="fig:t5_img_nearest_supersampling_16">10</a>: Nearest texture sampling with supersampling rate 16.</p></li>
+<li><p>Fig.<a href="#fig:t5_img_linear_supersampling_1" data-reference-type="ref" data-reference="fig:t5_img_linear_supersampling_1">11</a>: Bilinear texture sampling with supersampling rate 1.</p></li>
+<li><p>Fig.<a href="#fig:t5_img_linear_supersampling_16" data-reference-type="ref" data-reference="fig:t5_img_linear_supersampling_16">12</a>: Bilinear texture sampling with supersampling rate 16.</p></li>
+</ul>
+<p>The most significant improved is obtained when the bilinear interpolation is turned out. The output with the most smooth figure is given by Fig.<a href="#fig:t5_img_linear_supersampling_16" data-reference-type="ref" data-reference="fig:t5_img_linear_supersampling_16">12</a>: bilinear texture sampling with supersampling rate 16.</p>
+<p>The place where the most significant change occurs is the boundary. The boundary is significantly smoothed when bilinear interpolation is turned on. This is because of the occurrence of antialiasing, where the bilinear interpolation imposes a local filter that filers out part of the high frequency portion of the image.</p>
+<figure>
+<img src="CS 184 HW1 Task5 Img P_NEAREST Supersampling 1.png" id="fig:t5_img_nearest_supersampling_1" style="width:80.0%" alt="Task 5 rendering of texmap/test5.svg. It uses nearest texture sampling with supersampling rate 1. " /><figcaption aria-hidden="true">Task 5 rendering of <code>texmap/test5.svg</code>. It uses nearest texture sampling with supersampling rate 1. </figcaption>
+</figure>
+<figure>
+<img src="CS 184 HW1 Task5 Img P_NEAREST Supersampling 16.png" id="fig:t5_img_nearest_supersampling_16" style="width:80.0%" alt="Task 5 rendering of texmap/test5.svg. It uses nearest texture sampling with supersampling rate 16. " /><figcaption aria-hidden="true">Task 5 rendering of <code>texmap/test5.svg</code>. It uses nearest texture sampling with supersampling rate 16. </figcaption>
+</figure>
+<figure>
+<img src="CS 184 HW1 Task5 Img P_LINEAR Supersampling 1.png" id="fig:t5_img_linear_supersampling_1" style="width:80.0%" alt="Task 5 rendering of texmap/test5.svg. It uses bilinear texture sampling with supersampling rate 1. " /><figcaption aria-hidden="true">Task 5 rendering of <code>texmap/test5.svg</code>. It uses bilinear texture sampling with supersampling rate 1. </figcaption>
+</figure>
+<figure>
+<img src="CS 184 HW1 Task5 Img P_LINEAR Supersampling 16.png" id="fig:t5_img_linear_supersampling_16" style="width:80.0%" alt="Task 5 rendering of texmap/test5.svg. It uses bilinear texture sampling with supersampling rate 16. " /><figcaption aria-hidden="true">Task 5 rendering of <code>texmap/test5.svg</code>. It uses bilinear texture sampling with supersampling rate 16. </figcaption>
+</figure>
+<h1 id="task-6-mipmap">Task 6: Mipmap</h1>
+<p>In this section, the Mipmap sampling from the texture image is implemented. The algorithm is as follows:</p>
+<ol>
+<li><p>For each point in the sample buffer, as in the normal texture sampling, compute the barycentric coordinate <span class="math inline">(<em>α</em>, <em>β</em>, <em>γ</em>)</span> and the corresponding texture image coordinate <span class="math inline">(<em>u</em>(<em>x</em>, <em>y</em>), <em>v</em>(<em>x</em>, <em>y</em>))</span></p></li>
+<li><p>In addition, in order to get the Jacobian at this location for the transform function <span class="math inline"><em>u</em>(<em>x</em>, <em>y</em>)</span> and <span class="math inline"><em>v</em>(<em>x</em>, <em>y</em>)</span> from the image space to the texture space, the following quantities are needed: <span class="math inline">$\frac{\partial u}{\partial x}$</span>, <span class="math inline">$\frac{\partial u}{\partial y}$</span>, <span class="math inline">$\frac{\partial v}{\partial x}$</span>, <span class="math inline">$\frac{\partial v}{\partial y}$</span>.</p></li>
+<li><p>To estimate the derivative, by using the same technique, we can calculate <span class="math inline"><em>u</em>(<em>x</em> + 1, <em>y</em>)</span>, <span class="math inline"><em>v</em>(<em>x</em> + 1, <em>y</em>)</span>, <span class="math inline"><em>u</em>(<em>x</em>, <em>y</em> + 1)</span>, <span class="math inline"><em>v</em>(<em>x</em>, <em>y</em> + 1)</span>. Then <span class="math display">$$\begin{dcases}
+    \frac{\partial u}{\partial x}(x,y)\approx \frac{u(x+1, y)-u(x,y)}{1} = u(x+1, y)-u(x,y)\\
+    \frac{\partial v}{\partial x}(x,y)\approx \frac{v(x+1, y)-v(x,y)}{1} = v(x+1, y)-v(x,y)\\
+    \frac{\partial u}{\partial y}(x,y)\approx \frac{u(x, y+1)-u(x,y)}{1} = u(x, y+1)-u(x,y)\\
+    \frac{\partial v}{\partial y}(x,y)\approx \frac{v(x, y+1)-v(x,y)}{1} = v(x, y+1)-v(x,y)
+    \end{dcases}$$</span></p></li>
+<li><p>Then the characteristic size of the transformed pixel in the texture space is given by: <span class="math display">$$L = \max\left(\sqrt{\left(\frac{\partial u}{\partial x}(x,y)\right)^2 + \left(\frac{\partial v}{\partial x}(x,y)\right)^2}, \sqrt{\left(\frac{\partial u}{\partial y}(x,y)\right)^2 + \left(\frac{\partial v}{\partial y}(x,y)\right)^2}\right)$$</span></p></li>
+<li><p><span class="math inline"><em>L</em></span> is interpreted as the following: for a original pixel of size <span class="math inline">1 × 1</span>, how large it is in the corresponding texture space. The color of the pixel should be the average of the texel that the pixel may corresponds to. The generation of the average is given by the following:</p>
+<ol>
+<li><p>Level 0 is the original texture image.</p></li>
+<li><p><span class="math inline">∀<em>i</em> ∈ ℕ</span>, level <span class="math inline"><em>i</em> + 1</span> is the image of level <span class="math inline"><em>i</em></span>, but shrunk to half of its original size. Therefore, each pixel in level <span class="math inline"><em>i</em></span> given by position <span class="math inline">(<em>j</em>, <em>k</em>)</span> is an average of <span class="math inline">(2<em>j</em>, 2<em>k</em>), (2<em>j</em>, 2<em>k</em> + 1), (2<em>j</em> + 1, 2<em>k</em>), (2<em>j</em> + 1, 2<em>k</em> + 1)</span> in level <span class="math inline"><em>i</em></span>.</p></li>
+<li><p>The induction proceeds until there a number of depth is reached.</p></li>
+</ol>
+<p>Therefore, for level <span class="math inline"><em>l</em></span>, an original texel <span class="math inline">(<em>u</em>, <em>v</em>)</span> corresponds to the level <span class="math inline"><em>l</em></span> texel <span class="math inline">(2<sup> − <em>l</em></sup><em>u</em>, 2<sup> − <em>l</em></sup><em>v</em>)</span>.</p></li>
+<li><p>To determine the level <span class="math inline"><em>D</em></span>, the mapped region from the original pixel in level <span class="math inline"><em>D</em></span> should also have a size of approximately 1. Therefore, <span class="math inline">2<sup> − <em>D</em></sup><em>L</em> = 1</span>, <span class="math inline"><em>D</em> = <em>l</em><em>o</em><em>g</em><sub>2</sub>(<em>L</em>)</span>.</p></li>
+<li><p>The computed value of <span class="math inline"><em>D</em></span> may not be an integer. Therefore, if <span class="math inline"><em>D</em></span> is smaller than <span class="math inline">0</span>, which means the pixel corresponds to only a very small region of the texture, <span class="math inline"><em>D</em></span> should be given as <span class="math inline">0</span>. If <span class="math inline"><em>D</em></span> is larger than a maximum, then it is truncated to a maximum. But still <span class="math inline"><em>D</em></span> may not be an integer. There are multiple techniques.</p>
+<p>Nearest level:</p>
+<ol>
+<li><p>Choose <span class="math inline"><em>r</em><em>o</em><em>u</em><em>n</em><em>d</em>(<em>D</em>)</span> level, the nearest level.</p></li>
+<li><p>Then the pixel value is the same as the corresponding texel value in level <span class="math inline"><em>r</em><em>o</em><em>u</em><em>n</em><em>d</em>(<em>D</em>)</span>.</p></li>
+</ol>
+<p>Linear interpolation:</p>
+<ol>
+<li><p>For any calculated <span class="math inline"><em>D</em></span>, we may have <span class="math inline"><em>f</em><em>l</em><em>o</em><em>o</em><em>r</em>(<em>D</em>)</span> and <span class="math inline"><em>c</em><em>e</em><em>i</em><em>l</em>(<em>D</em>)</span>, then we perform a linear interpolation between the value of the corresponding texels in the two levels. This will gives a smoother image.</p></li>
+<li><p>Fill the sample buffer with the interpolated color.</p></li>
+<li><p>If bilinear interpolation is used when doing the texture sampling, then it is call the trilinear sampling.</p></li>
+</ol></li>
+</ol>
+<p>The tradeoff of various techniques are described as below.</p>
+<ol>
+<li><p>Pixel sampling: <code>P_NEAREST</code> and <code>P_LINEAR</code></p>
+<ul>
+<li><p>Memory: They use the same amount of memory because no extra information regarding to the texture image is needed to be stored.</p></li>
+<li><p>Speed: <code>P_NEAREST</code> is faster since no interpolation is needed. However, <code>P_LINEAR</code> needs to calculate the interpolation between 4 points.</p></li>
+<li><p>Antialiasing power: <code>P_LINEAR</code> is better because is produce a smoother transition by applying a locally weighted average filter of 4 texel points.</p></li>
+</ul></li>
+<li><p>Level sampling: <code>L_ZERO</code>, <code>L_NEAREST</code>, <code>L_LINEAR</code></p>
+<ul>
+<li><p>Memory: <code>L_ZERO</code> only stores the original texture image, no additional memory needed. However, <code>L_NEAREST</code> and <code>L_LINEAR</code> needs to store sublevel. The amount of memory needed is given by <span class="math inline">$\frac{4}{3}$</span> of the original image size.</p></li>
+<li><p>Speed: <code>L_ZERO</code> is the fastest because no level sampling is required, just pulling out the value from the original texture image. <code>L_NEAREST</code> takes more time because the Mipmap level needs to be calculated before pulling out the desired texel value. <code>L_LINEAR</code> is the slowest because not only does it needs to calculate the Mipmap level, it also needs to pull out the desired texel values from two adjacent level and perform a linear interpolation.</p></li>
+<li><p>Antialiasing power: <code>L_ZERO</code> has the least antialiasing power. <code>L_NEAREST</code> has a better antialiasing power because it incorporates an average of texture image at the desired level. <code>L_LINEAR</code> has the most antialiasing power because not only it averages the texture image, it also makes an average between the levels so that there is no discontinuity in the Mipmap level of the rendered image.</p></li>
+</ul></li>
+<li><p>Supersampling rate <span class="math inline"><em>R</em></span>: 1, 4, 9, 16</p>
+<ul>
+<li><p>Memory: The sample buffer size is linearly proportional to the supersampling rate, that is, <span class="math inline"><em>O</em>(<em>R</em>)</span>.</p></li>
+<li><p>Speed: The speed is inverse proportional to the supersampling rate, that is <span class="math inline"><em>O</em>(<em>R</em><sup> − 1</sup>)</span>. It not only needs to iterate through the bounding box with <span class="math inline"><em>R</em></span> times more pixels as original, but when resolving to the framebuffer, an average between <span class="math inline"><em>R</em></span> pixels are needed to be taken as well.</p></li>
+<li><p>Antialiasing power: It increases with <span class="math inline"><em>R</em></span> because more information is drawn from the rasterization process. That is, the sampling rate is increase, so higher frequency information could be preserved.</p></li>
+</ul></li>
+</ol>
+<p>The rendering of a texture image with grid of <span class="math inline"><code>texmap/test1.svg</code></span> is included below.</p>
+<ul>
+<li><p>Fig.<a href="#fig:t6_img_lzpn" data-reference-type="ref" data-reference="fig:t6_img_lzpn">13</a>: <code>L_ZERO</code> with <code>P_NEAREST</code></p></li>
+<li><p>Fig.<a href="#fig:t6_img_lzpl" data-reference-type="ref" data-reference="fig:t6_img_lzpl">14</a>: <code>L_ZERO</code> with <code>P_LINEAR</code></p></li>
+<li><p>Fig.<a href="#fig:t6_img_lnpn" data-reference-type="ref" data-reference="fig:t6_img_lnpn">15</a>: <code>L_NEAREST</code> with <code>P_NEAREST</code></p></li>
+<li><p>Fig.<a href="#fig:t6_img_lnpl" data-reference-type="ref" data-reference="fig:t6_img_lnpl">16</a>: <code>L_NEAREST</code> with <code>P_LINEAR</code></p></li>
+</ul>
+<figure>
+<img src="CS 184 HW1 Task6 LZ PN.png" id="fig:t6_img_lzpn" style="width:80.0%" alt="Task 6 rendering of texmap/test1.svg with alternative texture image. It uses L_ZERO with P_NEAREST. " /><figcaption aria-hidden="true">Task 6 rendering of <code>texmap/test1.svg</code> with alternative texture image. It uses <code>L_ZERO</code> with <code>P_NEAREST</code>. </figcaption>
+</figure>
+<figure>
+<img src="CS 184 HW1 Task6 LZ PL.png" id="fig:t6_img_lzpl" style="width:80.0%" alt="Task 6 rendering of texmap/test1.svg with alternative texture image. It uses L_ZERO with P_LINEAR. " /><figcaption aria-hidden="true">Task 6 rendering of <code>texmap/test1.svg</code> with alternative texture image. It uses <code>L_ZERO</code> with <code>P_LINEAR</code>. </figcaption>
+</figure>
+<figure>
+<img src="CS 184 HW1 Task6 LN PN.png" id="fig:t6_img_lnpn" style="width:80.0%" alt="Task 6 rendering of texmap/test1.svg with alternative texture image. It uses L_NEAREST with P_NEAREST. " /><figcaption aria-hidden="true">Task 6 rendering of <code>texmap/test1.svg</code> with alternative texture image. It uses <code>L_NEAREST</code> with <code>P_NEAREST</code>. </figcaption>
+</figure>
+<figure>
+<img src="CS 184 HW1 Task6 LN PL.png" id="fig:t6_img_lnpl" style="width:80.0%" alt="Task 6 rendering of texmap/test1.svg with alternative texture image. It uses L_NEAREST with P_LINEAR. " /><figcaption aria-hidden="true">Task 6 rendering of <code>texmap/test1.svg</code> with alternative texture image. It uses <code>L_NEAREST</code> with <code>P_LINEAR</code>. </figcaption>
+</figure>
