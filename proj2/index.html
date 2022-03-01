@@ -1,7 +1,461 @@
-<html>
-	<head>
-	</head>
-	<body>
-		Project 2 here
-	</body>
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="" xml:lang="">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <meta name="author" content="Catherine Gai, Wenhan Sun" />
+  <title>CS 184 HW2 Report </title>
+  <style>
+    html {
+      line-height: 1.7;
+      font-family: Georgia, serif;
+      font-size: 20px;
+      color: #1a1a1a;
+      background-color: #fdfdfd;
+    }
+    body {
+      margin: 0 auto;
+      max-width: 40em;
+      padding-left: 50px;
+      padding-right: 50px;
+      padding-top: 50px;
+      padding-bottom: 50px;
+      hyphens: auto;
+      word-wrap: break-word;
+      text-rendering: optimizeLegibility;
+      font-kerning: normal;
+    }
+    @media (max-width: 600px) {
+      body {
+        font-size: 0.9em;
+        padding: 1em;
+      }
+    }
+    @media print {
+      body {
+        background-color: transparent;
+        color: black;
+      }
+      p, h2, h3 {
+        orphans: 3;
+        widows: 3;
+      }
+      h2, h3, h4 {
+        page-break-after: avoid;
+      }
+    }
+    p {
+      margin-top: 1.7em;
+    }
+    a {
+      color: #1a1a1a;
+    }
+    a:visited {
+      color: #1a1a1a;
+    }
+    img {
+      max-width: 100%;
+    }
+    h1, h2, h3, h4, h5, h6 {
+      margin-top: 1.7em;
+    }
+    ol, ul {
+      padding-left: 1.7em;
+      margin-top: 1.7em;
+    }
+    li > ol, li > ul {
+      margin-top: 0;
+    }
+    blockquote {
+      margin: 1.7em 0 1.7em 1.7em;
+      padding-left: 1em;
+      border-left: 2px solid #e6e6e6;
+      font-style: italic;
+    }
+    code {
+      font-family: Menlo, Monaco, 'Lucida Console', Consolas, monospace;
+      background-color: #f0f0f0;
+      font-size: 85%;
+      margin: 0;
+      padding: .2em .4em;
+    }
+    pre {
+      line-height: 1.5em;
+      padding: 1em;
+      background-color: #f0f0f0;
+      overflow: auto;
+    }
+    pre code {
+      padding: 0;
+      overflow: visible;
+    }
+    hr {
+      background-color: #1a1a1a;
+      border: none;
+      height: 1px;
+      margin-top: 1.7em;
+    }
+    table {
+      border-collapse: collapse;
+      width: 100%;
+      overflow-x: auto;
+      display: block;
+    }
+    th, td {
+      border-bottom: 1px solid lightgray;
+      padding: 1em 3em 1em 0;
+    }
+    header {
+      margin-bottom: 6em;
+      text-align: center;
+    }
+    nav a:not(:hover) {
+      text-decoration: none;
+    }
+    code{white-space: pre-wrap;}
+    span.smallcaps{font-variant: small-caps;}
+    span.underline{text-decoration: underline;}
+    div.column{display: inline-block; vertical-align: top; width: 50%;}
+    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+    ul.task-list{list-style: none;}
+  </style>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
+  <!--[if lt IE 9]>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/html5shiv/3.7.3/html5shiv-printshiv.min.js"></script>
+  <![endif]-->
+</head>
+<body>
+<header id="title-block-header">
+<h1 class="title"><span><strong>CS 184 HW2 Report</strong></span><br /></h1>
+<p class="author">Catherine Gai, Wenhan Sun</p>
+<p class="date">2022 Spring</p>
+</header>
+<h1 class="unnumbered" id="overview">Overview</h1>
+<p>In this project, we implement the following features:</p>
+<ul>
+<li><p>Section 1: Compute Bezier curves and surfaces.</p>
+<ul>
+<li><p>Part 1: Compute Bezier curve using 1D de Casteljau’s algorithm.</p></li>
+<li><p>Part 2: Compute Bezier curve using 2D de Casteljau’s algorithm, that is, performing 1D de Casteljau’s algorithm for each row of the grid and performing another 1D de Casteljau’s algorithm for the resulting column.</p></li>
+</ul></li>
+<li><p>Section 2: Implementing triangle mesh operations with halfedge data structure.</p>
+<ul>
+<li><p>Part 3: Implement the area-weighted average normal of each vertex.</p></li>
+<li><p>Part 4: Implement the edge flip operation, that is, given 4 original points <span class="math inline">\(A, B, C, D\)</span> that makes up 2 triangles: <span class="math inline">\(ABC, BCD\)</span>, the triangle are rearranged to be <span class="math inline">\(ABD, ACD\)</span>.</p></li>
+<li><p>Part 5: Implement the edge split operation, that is, given 4 original points <span class="math inline">\(A, B, C, D\)</span> that makes up 2 triangles: <span class="math inline">\(ABC, BCD\)</span>, create a new vertex <span class="math inline">\(M\)</span> in the middle of <span class="math inline">\(B\)</span> and <span class="math inline">\(C\)</span> and reconstruct the local triangle mesh to <span class="math inline">\(ABM, BMD, DMC, CMA\)</span>. Moreover, <span class="math inline">\(AM\)</span> and <span class="math inline">\(CM\)</span> are assigned to be new edges.</p></li>
+<li><p>Part 6: Implement the upsampling of the triangle mesh using the following algorithm:</p>
+<ol>
+<li><p>Split all original edges in random order.</p></li>
+<li><p>Flip all new edges as defined in the edge split operation.</p></li>
+<li><p>Update all new vertices and old vertices according to a specific rule (see Part 6 in Section 2).</p></li>
+</ol></li>
+</ul></li>
+</ul>
+<h1 class="unnumbered" id="section-1-bezier-curves-and-surfaces">Section 1: Bezier Curves and Surfaces</h1>
+<p>Suppose <span class="math inline">\(V\)</span> is a vector space, <span class="math inline">\(n\in\mathbb{N}_+\)</span>. Suppose <span class="math inline">\(\{m_i\in\mathbb{N}|i\in\mathbb{N}_+(n)\}\)</span> and suppose <span class="math inline">\(a\)</span> is an <span class="math inline">\(n\)</span>-sequence in <span class="math inline">\(\displaystyle\prod_{i=1}^n\mathbb{N}(m_i+1)\to V\)</span>. Then the <span class="math inline">\(n\)</span><strong>-dimensional Bezier structure</strong> of degree <span class="math inline">\(\{m_i\in\mathbb{N}|i\in\mathbb{N}_+(n)\}\)</span> with controls points <span class="math inline">\(a\)</span> is defined as the function in <span class="math inline">\([0,1]^n\to V\)</span>: <span class="math display">\[\{u_i|i\in\mathbb{N}_+(n)\} \mapsto \displaystyle\sum_{\{k_i|i\in\mathbb{N}_+(n)\}\in \displaystyle\prod_{i=1}\mathbb{N}(m_i+1)} a(\{k_i|i\in\mathbb{N}_+(n)\}) \displaystyle\prod_{i=1}^n\binom{m_i}{k_i}u_i^{k_i}(1-u_i)^{m_i-k_i}\]</span></p>
+<p>A 1-dimensional Bezier structure is defined as a <strong>Bezier curve</strong>. A 2-dimensional Bezier structure is defined as a <strong>Bezier surface</strong>.</p>
+<h2 class="unnumbered" id="part-1-bezier-curves-with-1d-de-casteljaus-subdivision">Part 1: Bezier Curves with 1D de Casteljau’s Subdivision</h2>
+<p>Suppose <span class="math inline">\(a\)</span> is a 1-dimensional sequence, that is <span class="math inline">\(n=1\)</span>. Then the Bezier curve evaluated at <span class="math inline">\(t\in[0,1]\)</span> could be calculated by the 1-dimensional de Casteljau’s algorithm:</p>
+<p>Initialize <span class="math inline">\(b\leftarrow\)</span> copy of <span class="math inline">\(a\)</span></p>
+<p>The new curve is stored in <code>bzc/curve3.bzc</code>. The control points are given by Tab.<a href="#tab:p1_points" data-reference-type="ref" data-reference="tab:p1_points">1</a>. The complete rendering of the curve is given by Fig.<a href="#fig:p1_complete" data-reference-type="ref" data-reference="fig:p1_complete">1</a>. For each level, the rendering of the curve <code>bzc/curve3.bzc</code> is given by Fig.<a href="#fig:p1_levels" data-reference-type="ref" data-reference="fig:p1_levels">[fig:p1_levels]</a>. A modified curve based on <code>bzc/curve3.bzc</code> is given by Fig.<a href="#fig:p1_modified" data-reference-type="ref" data-reference="fig:p1_modified">2</a>.</p>
+<div id="tab:p1_points">
+<table>
+<caption>The control points of <code>bzc/curve3.bzc</code></caption>
+<thead>
+<tr class="header">
+<th style="text-align: center;">Index</th>
+<th style="text-align: center;">Point in <span class="math inline">\(\mathbb{R}^2\)</span></th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">(0.200, 0.350)</td>
+</tr>
+<tr class="even">
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">(0.250, 0.540)</td>
+</tr>
+<tr class="odd">
+<td style="text-align: center;">2</td>
+<td style="text-align: center;">(0.300, 0.600)</td>
+</tr>
+<tr class="even">
+<td style="text-align: center;">3</td>
+<td style="text-align: center;">(0.800, 0.750)</td>
+</tr>
+<tr class="odd">
+<td style="text-align: center;">4</td>
+<td style="text-align: center;">(1.000, 0.650)</td>
+</tr>
+<tr class="even">
+<td style="text-align: center;">5</td>
+<td style="text-align: center;">(0.900, 0.450)</td>
+</tr>
+</tbody>
+</table>
+</div>
+<figure>
+<img src="CS 184 HW2 P1 Img Complete.png" id="fig:p1_complete" style="width:80.0%" alt="Complete rendering of the Bezier curve given by bzc/curve3.bzc" /><figcaption aria-hidden="true">Complete rendering of the Bezier curve given by <code>bzc/curve3.bzc</code></figcaption>
+</figure>
+<figure>
+<img src="CS 184 HW2 P1 Img Level 0.png" alt="Level 0" /><figcaption aria-hidden="true">Level 0</figcaption>
+</figure>
+<figure>
+<img src="CS 184 HW2 P1 Img Level 1.png" alt="Level 1" /><figcaption aria-hidden="true">Level 1</figcaption>
+</figure>
+<figure>
+<img src="CS 184 HW2 P1 Img Level 2.png" alt="Level 2" /><figcaption aria-hidden="true">Level 2</figcaption>
+</figure>
+<figure>
+<img src="CS 184 HW2 P1 Img Level 3.png" alt="Level 3" /><figcaption aria-hidden="true">Level 3</figcaption>
+</figure>
+<figure>
+<img src="CS 184 HW2 P1 Img Level 4.png" alt="Level 4" /><figcaption aria-hidden="true">Level 4</figcaption>
+</figure>
+<figure>
+<img src="CS 184 HW2 P1 Img Level 5.png" alt="Level 5" /><figcaption aria-hidden="true">Level 5</figcaption>
+</figure>
+<figure>
+<img src="CS 184 HW2 P1 Img Modified.png" id="fig:p1_modified" style="width:80.0%" alt="Modified rendering of the Bezier curve given by bzc/curve3.bzc" /><figcaption aria-hidden="true">Modified rendering of the Bezier curve given by <code>bzc/curve3.bzc</code></figcaption>
+</figure>
+<h2 class="unnumbered" id="part-2-bezier-surfaces-with-separable-1d-de-casteljaus">Part 2: Bezier Surfaces with Separable 1D de Casteljau’s</h2>
+<p>Suppose <span class="math inline">\(a\)</span> is a 2-dimensional sequence of size <span class="math inline">\((m_1+1)\times (m_2+1)\)</span>, that is <span class="math inline">\(n=2\)</span>. Then the Bezier surface evaluated at <span class="math inline">\((u,v)\in[0,1]^2\)</span> could be calculated doing separate 1-dimensional de Casteljau’s algorithm:</p>
+<p><span class="math inline">\(b\leftarrow\{\mathtt{de\_Casteljaus\_1d}(a_i, u)|i\in\mathbb{N}(m_1+1)\}\)</span> <span class="math inline">\(c\leftarrow\mathtt{de\_Casteljaus\_1d}(b, v)\)</span></p>
+<p>The rendering of <code>bez/teapot.bez</code> is given by Fig.<a href="#fig:p2" data-reference-type="ref" data-reference="fig:p2">3</a>.</p>
+<figure>
+<img src="CS 184 HW2 P2 Img.png" id="fig:p2" style="width:80.0%" alt="Rendering of bez/teapot.bez. " /><figcaption aria-hidden="true">Rendering of <code>bez/teapot.bez</code>. </figcaption>
+</figure>
+<h1 class="unnumbered" id="section-2-triangle-meshes-and-half-edge-data-structure">Section 2: Triangle Meshes and Half-Edge Data Structure</h1>
+<h2 class="unnumbered" id="part-3-area-weighted-vertex-normals">Part 3: Area-Weighted Vertex Normals</h2>
+<p>Suppose <span class="math inline">\(\mathbf{v}\)</span> is a vertex and <span class="math inline">\(F\)</span> is a set of all triangles such that one of the vertices of <span class="math inline">\(f_i\)</span> is <span class="math inline">\(\mathbf{v}\)</span>. Suppose <span class="math inline">\(\forall f\in F\)</span> the area vector (oriented outward) is <span class="math inline">\(\mathbf{a}_f\)</span>. Then the area-weighted vertex unit normal at vertex <span class="math inline">\(\mathbf{v}\)</span> is mathematically given by: <span class="math display">\[\mathbf{n}_\mathbf{v} = \frac{\displaystyle\sum_{f\in F}\mathbf{a}_f}{\left\|\displaystyle\sum_{f\in F}\mathbf{a}_f\right\|}\]</span></p>
+<p><span class="math inline">\(\mathbf{n}_\mathbf{v}\)</span> also orients outward in this manifold.</p>
+<p><span class="math inline">\(\forall f\in F\)</span>, suppose the vertices in the positive orientation of <span class="math inline">\(f\)</span> is given by <span class="math inline">\(\mathbf{v},\mathbf{v}_{1,f},\mathbf{v}_{2,f}\)</span>. Then by the definition of cross product in <span class="math inline">\(\mathbb{R}^3\)</span>, the area vector oriented outward is <span class="math inline">\(\mathbf{a}_f\)</span> is given by: <span class="math display">\[\mathbf{a}_f = (\mathbf{v}_{1,f}-\mathbf{v})\times (\mathbf{v}_{2,f}-\mathbf{v})\]</span></p>
+<p>Therefore, <span class="math display">\[\mathbf{n}_\mathbf{v} = \frac{\displaystyle\sum_{f\in F}(\mathbf{v}_{1,f}-\mathbf{v})\times (\mathbf{v}_{2,f}-\mathbf{v})}{\left\|\displaystyle\sum_{f\in F}(\mathbf{v}_{1,f}-\mathbf{v})\times (\mathbf{v}_{2,f}-\mathbf{v})\right\|}\]</span></p>
+<p>The renderings of <code>bez/teapot.bez</code> with flat shading and Phong shading are given by Fig.<a href="#fig:p3" data-reference-type="ref" data-reference="fig:p3">[fig:p3]</a>.</p>
+<figure>
+<img src="CS 184 HW2 P3 Img Flat.png" alt="Flat shading" /><figcaption aria-hidden="true">Flat shading</figcaption>
+</figure>
+<figure>
+<img src="CS 184 HW2 P3 Img Phong.png" alt="Phong shading" /><figcaption aria-hidden="true">Phong shading</figcaption>
+</figure>
+<h2 class="unnumbered" id="part-4-edge-flip">Part 4: Edge Flip</h2>
+<p>The edge flip operation is the following operation: Suppose <span class="math inline">\(a,b,c,d\)</span> are four vertices such that 2 triangles are formed between the four vertices: <span class="math inline">\(abc,bcd\)</span>. The operation results in the triangles to be <span class="math inline">\(abd\)</span> and <span class="math inline">\(acd\)</span>.</p>
+<p>The edge flip operation preserves the number of object in each class, for instance: Edge <span class="math inline">\(bc\)</span> can be used as Edge <span class="math inline">\(ad\)</span>; halfedge <span class="math inline">\(bc\)</span> and <span class="math inline">\(cb\)</span> can be used as halfedge <span class="math inline">\(ad\)</span> and <span class="math inline">\(da\)</span> respectively. Therefore, the operation is just a reassigning of pointers of each object (vertex, edge, face, halfedge). Pre-existing vertice, edge, face, and halfedge objects remain representing the same thing. Therefore, there are some tricks that is to be noticed:</p>
+<ul>
+<li><p>Because halfedges on the boundaries do not change their representation, their twins do not need to be modified.</p></li>
+<li><p>Vertex <span class="math inline">\(a\)</span> and <span class="math inline">\(d\)</span> has no halfedge removed from them, so their halfedges do not need to be modified.</p></li>
+<li><p>The relation between all edges and halfedges remains the same, specifically, <span class="math inline">\((bc,cb)=(ad,da)\iff bc=ad\)</span> (halfedge on the left hand sde and edge on the right).</p></li>
+</ul>
+<p>The table of object representation is given as Tab.<a href="#tab:p4_obj_representation" data-reference-type="ref" data-reference="tab:p4_obj_representation">3</a>.</p>
+<div id="tab:p4_obj_representation">
+<table>
+<caption>Object representation in edge flip operation. </caption>
+<thead>
+<tr class="header">
+<th style="text-align: center;">Halfedge</th>
+<th style="text-align: center;">Vertex</th>
+<th style="text-align: center;">Edge</th>
+<th style="text-align: center;">Face</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: center;"><span class="math inline">\(ab\to ab\)</span></td>
+<td style="text-align: center;"><span class="math inline">\(a\to a\)</span></td>
+<td style="text-align: center;"><span class="math inline">\(ab\to ab\)</span></td>
+<td style="text-align: center;"><span class="math inline">\(abc\to abd\)</span></td>
+</tr>
+<tr class="even">
+<td style="text-align: center;"><span class="math inline">\(bc\to ad\)</span></td>
+<td style="text-align: center;"><span class="math inline">\(b\to b\)</span></td>
+<td style="text-align: center;"><span class="math inline">\(bc\to ad\)</span></td>
+<td style="text-align: center;"><span class="math inline">\(bcd\to acd\)</span></td>
+</tr>
+<tr class="odd">
+<td style="text-align: center;"><span class="math inline">\(ca\to ca\)</span></td>
+<td style="text-align: center;"><span class="math inline">\(c\to c\)</span></td>
+<td style="text-align: center;"><span class="math inline">\(ca\to ca\)</span></td>
+<td style="text-align: center;"></td>
+</tr>
+<tr class="even">
+<td style="text-align: center;"><span class="math inline">\(cb\to da\)</span></td>
+<td style="text-align: center;"><span class="math inline">\(d\to d\)</span></td>
+<td style="text-align: center;"><span class="math inline">\(bd\to bd\)</span></td>
+<td style="text-align: center;"></td>
+</tr>
+<tr class="odd">
+<td style="text-align: center;"><span class="math inline">\(bd\to bd\)</span></td>
+<td style="text-align: center;"></td>
+<td style="text-align: center;"><span class="math inline">\(dc\to dc\)</span></td>
+<td style="text-align: center;"></td>
+</tr>
+<tr class="even">
+<td style="text-align: center;"><span class="math inline">\(dc\to dc\)</span></td>
+<td style="text-align: center;"></td>
+<td style="text-align: center;"></td>
+<td style="text-align: center;"></td>
+</tr>
+</tbody>
+</table>
+</div>
+<p>The rendering of <code>dae/teapot.dae</code> with or without edge flips is included as Fig.<a href="#fig:p4" data-reference-type="ref" data-reference="fig:p4">[fig:p4]</a>.</p>
+<p><em>There is no eventful debugging journey in this part. We have succeeded implementing that on the first build. However, my partner and I share different perspective on visualizing this operation: my partner view it as rotating only the edge between <span class="math inline">\(bc\)</span> to <span class="math inline">\(ad\)</span>; I view it as rotating both the triangle together by 90 degrees without rotating the boundary.</em></p>
+<figure>
+<img src="CS 184 HW2 P4 Img Original.png" alt="Original mesh" /><figcaption aria-hidden="true">Original mesh</figcaption>
+</figure>
+<figure>
+<img src="CS 184 HW2 P4 Img Flipped.png" alt="Mesh with some edge flips" /><figcaption aria-hidden="true">Mesh with some edge flips</figcaption>
+</figure>
+<h2 class="unnumbered" id="part-5-edge-split">Part 5: Edge Split</h2>
+<p>The edge split operation is the following operation: Suppose <span class="math inline">\(a,b,c,d\)</span> are four vertices such that <span class="math inline">\(2\)</span> triangles are formed between the four vertices: <span class="math inline">\(abc,bcd\)</span>. The operation results in a new vertex being created as <span class="math inline">\(m\)</span>, and the triangles between <span class="math inline">\(a,b,c,d,m\)</span> are now: <span class="math inline">\(amb,bmd,dmc,cma\)</span> where <span class="math inline">\(m\)</span> is the midpoint between <span class="math inline">\(b\)</span> and <span class="math inline">\(c\)</span>.</p>
+<p>The edge split operation requires 6 additional halfedges, 3 additional edges, 1 additional vertex, and 2 additional vertices. Therefore, the table of object representation is given as Tab.<a href="#" data-reference-type="ref" data-reference="">[]</a>. Pre-existing vertex, edge, face, and halfedge objects remain representing the same thing. Some tricks are to be noticed:</p>
+<ul>
+<li><p>Because halfedges on the boundaries does not change their representations, their twins do not need to be modified.</p></li>
+<li><p>Vertex <span class="math inline">\(a,c,d\)</span> have no halfedge removed from them, so their halfedges do not need to be modified.</p></li>
+<li><p>The relation between all pre-existing edges and halfedges objects remains the same, specifically, <span class="math inline">\((bc,cb)=(bm,mb)\iff bc=bm\)</span>.</p></li>
+<li><p>The new edge <span class="math inline">\(am\)</span> and <span class="math inline">\(md\)</span> are flagged as <code>isNew = true</code> to facilitate upsampling.</p></li>
+</ul>
+<div id="tab:p4_obj_representation">
+<table>
+<caption>Object representation in edge flip operation. </caption>
+<thead>
+<tr class="header">
+<th style="text-align: center;">Halfedge</th>
+<th style="text-align: center;">Vertex</th>
+<th style="text-align: center;">Edge</th>
+<th style="text-align: center;">Face</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: center;"><span class="math inline">\(bc\to bm\)</span></td>
+<td style="text-align: center;"><span class="math inline">\(b\to b\)</span></td>
+<td style="text-align: center;"><span class="math inline">\(bc\to bm\)</span></td>
+<td style="text-align: center;"><span class="math inline">\(abc\to abm\)</span></td>
+</tr>
+<tr class="even">
+<td style="text-align: center;"><span class="math inline">\(ca\to ca\)</span></td>
+<td style="text-align: center;"><span class="math inline">\(c\to c\)</span></td>
+<td style="text-align: center;"><span class="math inline">\(ca\to ca\)</span></td>
+<td style="text-align: center;"><span class="math inline">\(bdc\to bdm\)</span></td>
+</tr>
+<tr class="odd">
+<td style="text-align: center;"><span class="math inline">\(ab\to ab\)</span></td>
+<td style="text-align: center;"><span class="math inline">\(a\to a\)</span></td>
+<td style="text-align: center;"><span class="math inline">\(ab\to ab\)</span></td>
+<td style="text-align: center;">new <span class="math inline">\(dcm\)</span></td>
+</tr>
+<tr class="even">
+<td style="text-align: center;"><span class="math inline">\(cb\to mb\)</span></td>
+<td style="text-align: center;"><span class="math inline">\(d\to d\)</span></td>
+<td style="text-align: center;"><span class="math inline">\(bd\to bd\)</span></td>
+<td style="text-align: center;">new <span class="math inline">\(cam\)</span></td>
+</tr>
+<tr class="odd">
+<td style="text-align: center;"><span class="math inline">\(bd\to bd\)</span></td>
+<td style="text-align: center;">new <span class="math inline">\(m\)</span></td>
+<td style="text-align: center;"><span class="math inline">\(dc\to dc\)</span></td>
+<td style="text-align: center;"></td>
+</tr>
+<tr class="even">
+<td style="text-align: center;"><span class="math inline">\(dc\to dc\)</span></td>
+<td style="text-align: center;"></td>
+<td style="text-align: center;">new <span class="math inline">\(ma\)</span></td>
+<td style="text-align: center;"></td>
+</tr>
+<tr class="odd">
+<td style="text-align: center;">new <span class="math inline">\(ma\)</span></td>
+<td style="text-align: center;"></td>
+<td style="text-align: center;">new <span class="math inline">\(dm\)</span></td>
+<td style="text-align: center;"></td>
+</tr>
+<tr class="even">
+<td style="text-align: center;">new <span class="math inline">\(dm\)</span></td>
+<td style="text-align: center;"></td>
+<td style="text-align: center;">new <span class="math inline">\(cm\)</span></td>
+<td style="text-align: center;"></td>
+</tr>
+<tr class="odd">
+<td style="text-align: center;">new <span class="math inline">\(md\)</span></td>
+<td style="text-align: center;"></td>
+<td style="text-align: center;"></td>
+<td style="text-align: center;"></td>
+</tr>
+<tr class="even">
+<td style="text-align: center;">new <span class="math inline">\(cm\)</span></td>
+<td style="text-align: center;"></td>
+<td style="text-align: center;"></td>
+<td style="text-align: center;"></td>
+</tr>
+<tr class="odd">
+<td style="text-align: center;">new <span class="math inline">\(mc\)</span></td>
+<td style="text-align: center;"></td>
+<td style="text-align: center;"></td>
+<td style="text-align: center;"></td>
+</tr>
+<tr class="even">
+<td style="text-align: center;">new <span class="math inline">\(am\)</span></td>
+<td style="text-align: center;"></td>
+<td style="text-align: center;"></td>
+<td style="text-align: center;"></td>
+</tr>
+</tbody>
+</table>
+</div>
+<p>The rendering of <code>dae/teapot.dae</code> with or without edge flips or edge splits is included as Fig.<a href="#fig:p5" data-reference-type="ref" data-reference="fig:p5">[fig:p5]</a>.</p>
+<p><em>There is no eventful debugging journey in this part. We have succeeded implementing that on the first build.</em></p>
+<figure>
+<img src="CS 184 HW2 P5 Img Original.png" alt="Original mesh" /><figcaption aria-hidden="true">Original mesh</figcaption>
+</figure>
+<figure>
+<img src="CS 184 HW2 P5 Img Split.png" alt="Mesh with only edge splits" /><figcaption aria-hidden="true">Mesh with only edge splits</figcaption>
+</figure>
+<figure>
+<img src="CS 184 HW2 P5 Img Combined.png" alt="Mesh with both edge flips and edge splits" /><figcaption aria-hidden="true">Mesh with both edge flips and edge splits</figcaption>
+</figure>
+<h2 class="unnumbered" id="part-6-loop-subdivision-for-mesh-upsampling">Part 6: Loop Subdivision for Mesh Upsampling</h2>
+<p>The loop subdivision method is an upsampling method such that each triangle is topologically subdivided into 4 triangles, where the positions of the vertices are updated. The algorithm is described as follows:</p>
+<ul>
+<li><p>Suppose for all vertices <span class="math inline">\(v\)</span>, the position of the vertex is <span class="math inline">\(P_v\)</span>.</p></li>
+<li><p>For each vertex <span class="math inline">\(v\)</span>, suppose the set of all neighbor vertices of <span class="math inline">\(v\)</span> is <span class="math inline">\(U\)</span>. Then the new position of <span class="math inline">\(v\)</span>, <span class="math inline">\(P_v\)</span>, is: <span class="math display">\[P_v \leftarrow (1-|U|\alpha) P_v + \alpha \displaystyle\sum_{u\in U}P_u\]</span> where <span class="math display">\[\alpha = \begin{dcases}
+    \frac{3}{16} &amp;,|U|=3 \\
+    \frac{3}{8|U|} &amp;,|U|&gt;3
+    \end{dcases}\]</span></p>
+<p>Moreover, upon iteration through the vertices, set all vertex to be pre-existing ones.</p></li>
+<li><p>For each edge in the old mesh, the edge would be split into two, and a new vertex would be created as <span class="math inline">\(v\)</span>. Suppose <span class="math inline">\(u_1\)</span> and <span class="math inline">\(u_2\)</span> are the two endpoints of the original edge and <span class="math inline">\(u&#39;_1\)</span> and <span class="math inline">\(u&#39;_2\)</span> are the vertices opposite to the original edge that was split in the two adjacent triangles. Then the position of <span class="math inline">\(v\)</span> is given by: <span class="math display">\[P_v \leftarrow \frac{3}{8}(P_{u_1}+P_{u_2}) + \frac{1}{8}(P_{u&#39;_1}+P_{u&#39;_2})\]</span></p>
+<p>Note that <span class="math inline">\(P_{u_1}\)</span>, <span class="math inline">\(P_{u_2}\)</span>, <span class="math inline">\(P_{u&#39;_1}\)</span>, <span class="math inline">\(P_{u&#39;_2}\)</span> refers to the position of the vertices previous to the update of the pre-existing vertices. To get away from that, the newly computed vertex positions are stored separately before they are transferred into the vertex at the end of the algorithm. Because no new vertex has yet been created, it is stored temporarily as the position linked to the edge.</p>
+<p>Moreover, upon iteration through the edges, set all edges to be pre-existing ones.</p>
+<p><em>Debugging journey: We did not thought of that at first, but it gives us error in the case where split is done before upsampling, or upsampling twice. Suppose two triangles <span class="math inline">\(abc\)</span> and <span class="math inline">\(bcd\)</span>. The edge split of <span class="math inline">\(bc\)</span> results in <span class="math inline">\(amb\)</span>, <span class="math inline">\(bmd\)</span>, <span class="math inline">\(dmc\)</span>, <span class="math inline">\(cma\)</span> as in the edge split part. <span class="math inline">\(ma\)</span> and <span class="math inline">\(md\)</span> are flagged as new, so when we split them in upsampling, the midpoint of <span class="math inline">\(ma\)</span>, denoted as <span class="math inline">\(m&#39;\)</span>, would be in the following situation: either <span class="math inline">\(m&#39;a\)</span> or <span class="math inline">\(m&#39;m\)</span> is new, inherited from <span class="math inline">\(ma\)</span>. This would lead that edge to be split, but it should not be the case. Therefore, we force all edges and vertices flagged as <code>isNew = false</code> before edge flip and split.</em></p></li>
+<li><p>Split all pre-existing edges in any order. A new vertex is created as this moment, so the position of the vertex is given by the position linked to the edge computed in the last step. The new</p></li>
+<li><p>Flip all edges that are flagged as new edges in the edge split operation that links a newly created vertex to a pre-existing vertex.</p></li>
+<li><p>Copy the computed value in the first step to the position of the pre-existing vertices. Flag all edges and vertices as pre-existing (<code>isNew = false</code>).</p></li>
+</ul>
+<p>For a regularly defined mesh, the new mesh is simply a denser version that shares the same shape with the original mesh (minified by a factor of 2). This well preserves the uniformity of the mesh since the relative structural difference between triangles is not changed significantly.</p>
+<p>Moreover, sharp corners are rounded because the upsampling algorithm tends to make the mesh behave more smoothly. Therefore, if a corner wants to be preserved, the mesh has to be dense at the corner order to detail the structure of the object at that location.</p>
+<p>The rendering of the original <code>dae/teapot.dae</code> and with upsampling is included as Fig.<a href="#fig:p6_teapot" data-reference-type="ref" data-reference="fig:p6_teapot">[fig:p6_teapot]</a>.</p>
+<figure>
+<img src="CS 184 HW2 P6 Img Teapot Original.png" alt="Original mesh" /><figcaption aria-hidden="true">Original mesh</figcaption>
+</figure>
+<figure>
+<img src="CS 184 HW2 P6 Img Teapot Upsample 1.png" alt="Upsampled once" /><figcaption aria-hidden="true">Upsampled once</figcaption>
+</figure>
+<figure>
+<img src="CS 184 HW2 P6 Img Teapot Upsample 2.png" alt="Upsampled twice" /><figcaption aria-hidden="true">Upsampled twice</figcaption>
+</figure>
+<p>For the cube in <code>dae/cube.dae</code>, the previous mesh is not symmetric under all symmetry of a cube.</p>
+<p>For mathematical establishment, suppose the center of the cube is positioned at the origin of the coordinate system with face normals in <span class="math inline">\(\mathbf{e}_x\)</span>, <span class="math inline">\(\mathbf{e}_y\)</span>, and <span class="math inline">\(\mathbf{e}_z\)</span> directions where <span class="math inline">\(\mathbf{e}_x\)</span>, <span class="math inline">\(\mathbf{e}_y\)</span>, and <span class="math inline">\(\mathbf{e}_z\)</span> forms a positive oriented orthonormal basis in <span class="math inline">\(\mathbb{R}^3\)</span>.</p>
+<p>The group of all operation that preserves the symmetry of the cube is given by the following subgroup in <span class="math inline">\(O(\mathbb{R}^3)\)</span> (the rotation group in <span class="math inline">\(\mathbb{R}^3\)</span>): the subgroup generated by <span class="math inline">\(R\left(\frac{\pi}{2}\mathbf{e}_x\right)\)</span>, <span class="math inline">\(R\left(\frac{\pi}{2}\mathbf{e}_y\right)\)</span>, and the inversion <span class="math inline">\(I\)</span> where <span class="math inline">\(R\)</span> is the axis-angle representation of proper rotation in <span class="math inline">\(\mathbb{R}^3\)</span>.</p>
+<p>Therefore, the topology of the mesh must also satisfies the symmetry specified above. An easy way to do this is to split all diagonal edges. Therefore, all faces looks the same: a cross produced by two diagonals, which maintains a rotation symmetry by an angle of <span class="math inline">\(\frac{\pi}{2}\)</span> in the direction of the surface normal. Therefore, this would produce a symmetric mesh after upsampling. Fig.<a href="#fig:p6_cube" data-reference-type="ref" data-reference="fig:p6_cube">[fig:p6_cube]</a> shows it is really the case.</p>
+<figure>
+<img src="CS 184 HW2 P6 Img Cube Modified.png" alt="Original mesh where all diagonal edges are split" /><figcaption aria-hidden="true">Original mesh where all diagonal edges are split</figcaption>
+</figure>
+<figure>
+<img src="CS 184 HW2 P6 Img Cube Upsample 1.png" alt="Upsampled once" /><figcaption aria-hidden="true">Upsampled once</figcaption>
+</figure>
+<figure>
+<img src="CS 184 HW2 P6 Img Cube Upsample 2.png" alt="Upsampled twice" /><figcaption aria-hidden="true">Upsampled twice</figcaption>
+</figure>
+</body>
 </html>
