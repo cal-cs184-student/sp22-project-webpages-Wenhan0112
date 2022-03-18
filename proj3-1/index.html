@@ -1,7 +1,541 @@
-<html>
-	<head>
-	</head>
-	<body>
-		Project 3-1 here
-	</body>
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="" xml:lang="">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <meta name="author" content="Catherine Gai, Wenhan Sun" />
+  <title>CS 184 HW3.1 Report </title>
+  <style>
+    html {
+      line-height: 1.7;
+      font-family: Georgia, serif;
+      font-size: 20px;
+      color: #1a1a1a;
+      background-color: #fdfdfd;
+    }
+    body {
+      margin: 0 auto;
+      max-width: 40em;
+      padding-left: 50px;
+      padding-right: 50px;
+      padding-top: 50px;
+      padding-bottom: 50px;
+      hyphens: auto;
+      word-wrap: break-word;
+      text-rendering: optimizeLegibility;
+      font-kerning: normal;
+    }
+    @media (max-width: 600px) {
+      body {
+        font-size: 0.9em;
+        padding: 1em;
+      }
+    }
+    @media print {
+      body {
+        background-color: transparent;
+        color: black;
+      }
+      p, h2, h3 {
+        orphans: 3;
+        widows: 3;
+      }
+      h2, h3, h4 {
+        page-break-after: avoid;
+      }
+    }
+    p {
+      margin-top: 1.7em;
+    }
+    a {
+      color: #1a1a1a;
+    }
+    a:visited {
+      color: #1a1a1a;
+    }
+    img {
+      max-width: 100%;
+    }
+    h1, h2, h3, h4, h5, h6 {
+      margin-top: 1.7em;
+    }
+    ol, ul {
+      padding-left: 1.7em;
+      margin-top: 1.7em;
+    }
+    li > ol, li > ul {
+      margin-top: 0;
+    }
+    blockquote {
+      margin: 1.7em 0 1.7em 1.7em;
+      padding-left: 1em;
+      border-left: 2px solid #e6e6e6;
+      font-style: italic;
+    }
+    code {
+      font-family: Menlo, Monaco, 'Lucida Console', Consolas, monospace;
+      background-color: #f0f0f0;
+      font-size: 85%;
+      margin: 0;
+      padding: .2em .4em;
+    }
+    pre {
+      line-height: 1.5em;
+      padding: 1em;
+      background-color: #f0f0f0;
+      overflow: auto;
+    }
+    pre code {
+      padding: 0;
+      overflow: visible;
+    }
+    hr {
+      background-color: #1a1a1a;
+      border: none;
+      height: 1px;
+      margin-top: 1.7em;
+    }
+    table {
+      border-collapse: collapse;
+      width: 100%;
+      overflow-x: auto;
+      display: block;
+    }
+    th, td {
+      border-bottom: 1px solid lightgray;
+      padding: 1em 3em 1em 0;
+    }
+    header {
+      margin-bottom: 6em;
+      text-align: center;
+    }
+    nav a:not(:hover) {
+      text-decoration: none;
+    }
+    code{white-space: pre-wrap;}
+    span.smallcaps{font-variant: small-caps;}
+    span.underline{text-decoration: underline;}
+    div.column{display: inline-block; vertical-align: top; width: 50%;}
+    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+    ul.task-list{list-style: none;}
+  </style>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
+  <!--[if lt IE 9]>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/html5shiv/3.7.3/html5shiv-printshiv.min.js"></script>
+  <![endif]-->
+</head>
+<body>
+<header id="title-block-header">
+<h1 class="title"><span><strong>CS 184 HW3.1 Report</strong></span><br /></h1>
+<p class="author">Catherine Gai, Wenhan Sun</p>
+<p class="date">2022 Spring</p>
+</header>
+<h1 class="unnumbered" id="webpage-link">Webpage Link</h1>
+<h2> Refer to Gradescope for actual compilation of LaTeX-typed report</h2>
+<p><a href="https://github.com/cal-cs184-student/sp22-project-webpages-Wenhan0112/blob/master/proj3-1/index.html">https://github.com/cal-cs184-student/sp22-project-webpages-Wenhan0112/blob/master/proj3-1/index.html</a></p>
+<h1 class="unnumbered" id="introduction">Introduction</h1>
+<p>In this homework, a global illumination scheme with adaptive sample is implemented. The core content are:</p>
+<ul>
+<li><p>Implementation of the determination of intersection between a ray and a primitive object. (Part 1)</p>
+<ul>
+<li><p>The ray-triangle intersection is computed via Eq.<a href="#eq:ray_triangle_intersection" data-reference-type="ref" data-reference="eq:ray_triangle_intersection">[eq:ray_triangle_intersection]</a>.</p></li>
+<li><p>The ray-sphere intersection is computed via Eq.<a href="#eq:ray_sphere_intersection" data-reference-type="ref" data-reference="eq:ray_sphere_intersection">[eq:ray_sphere_intersection]</a>.</p></li>
+</ul></li>
+<li><p>Recursive implementation of the bounding volume hierarchy. (Part 2)</p>
+<ul>
+<li><p>Creation of bounding volume hierarchy establish the list of primitives for leaf nodes and the child for non-leaf node. The separation criterion is: by the axis of the longest edge of the bounding box, partition the set of primitives into halves by sorting the primitive according to the centroid coordinate on the axis.</p></li>
+<li><p><strong>EXTRA CREDIT</strong>: The list of points to primitives are not duplicated. Instead, the order of the primitives are rearranged so that each node corresponds to a continuous segment of primitives in the list.</p></li>
+<li><p>The intersection test of the ray with the nodes is sped up as if the ray does not intersect the bounding box of the entire node, the ray does not intersect the descendants of the node.</p></li>
+</ul></li>
+<li><p>Implementation of the direct and global illumination (Part 3, 4).</p>
+<ul>
+<li><p>The rendering equation for direct illumination with hemisphere sampling is included as Eq.<a href="#eq:direct_illumination_hemisphere" data-reference-type="ref" data-reference="eq:direct_illumination_hemisphere">[eq:direct_illumination_hemisphere]</a>.</p></li>
+<li><p>The rendering equation for direct illumination with lighting sampling is included in Eq.<a href="#eq:direct_illumination_lighting" data-reference-type="ref" data-reference="eq:direct_illumination_lighting">[eq:direct_illumination_lighting]</a>.</p></li>
+<li><p>The rendering equation for global illumination is included in Eq.<a href="#eq:global_illumination" data-reference-type="ref" data-reference="eq:global_illumination">[eq:global_illumination]</a>.</p></li>
+</ul></li>
+<li><p>Implementation of the adaptive sampling, which adaptive change the pixel sample rate; stop to sample if the sample value has already converged.</p></li>
+</ul>
+<h1 class="unnumbered" id="part-1-ray-generation-and-scene-intersection">Part 1: Ray Generation and Scene Intersection</h1>
+<h2 class="unnumbered" id="task-1-ray-generation">Task 1: Ray Generation</h2>
+<p>A ray is a combination of the following parameters:</p>
+<ul>
+<li><p>The starting point <span class="math inline">\(\mathbf{o}\in\mathbb{R}^3\)</span>.</p></li>
+<li><p>The ray direction <span class="math inline">\(\mathbf{d}\in\partial B(\mathbf{0},1)\subseteq\mathbb{R}^3\)</span>.</p></li>
+<li><p>The depth of the ray (used for global illumination and default to 0).</p></li>
+<li><p>The section of the ray such that is seen by the origin <span class="math inline">\(t_{\mathrm{min}}\)</span> and <span class="math inline">\(t_{\mathrm{max}}\)</span>.</p></li>
+</ul>
+<p>Every pixel point in the normalized framebuffer <span class="math inline">\((x,y)\in[0,1]^2\)</span> constitute to a ray starting from the origin <span class="math inline">\((0,0,0)\)</span> directing in a way that passes through the focal plane at <span class="math display">\[\left((2x-1)\tan\left(\frac{F_h}{2}\right), (2y-1)\tan(\frac{F_v}{2}), -1\right)\]</span> where <span class="math inline">\(F_h\)</span> and <span class="math inline">\(F_v\)</span> are the horizontal and vertical field of viewing angles respectively. Therefore, the part of the focal plane that is saw by the camera is: <span class="math display">\[\left[-\tan\left(\frac{F_h}{2}\right), \tan\left(\frac{F_h}{2}\right)\right] \times \left[-\tan\left(\frac{F_v}{2}\right), \tan\left(\frac{F_v}{2}\right)\right]\]</span></p>
+<p>Therefore, the ray is given by the following parametrization:</p>
+<ul>
+<li><p>The starting point <span class="math inline">\(\mathbf{o}=(0,0,0)\)</span>.</p></li>
+<li><p>The ray direction <span class="math inline">\(\mathbf{d} = \dfrac{\left((2x-1)\tan\left(\frac{F_h}{2}\right), (2y-1)\tan(\frac{F_v}{2}), -1\right)}{\|\left((2x-1)\tan\left(\frac{F_h}{2}\right), (2y-1)\tan(\frac{F_v}{2}), -1\right)\|}\)</span></p></li>
+<li><p>The depth of the ray 0. (Since it goes directly to the camera).</p></li>
+<li><p>The section of the ray that is seen by the origin, <code>nClip</code> and <code>fClip</code>.</p></li>
+</ul>
+<h2 class="unnumbered" id="task-2-generating-pixel-samples">Task 2: Generating Pixel Samples</h2>
+<p>For each point <span class="math inline">\((x,y)\in[0,w]\times[0,h]\)</span> in the unnormalized framebuffer with width <span class="math inline">\(w\)</span>, height <span class="math inline">\(h\)</span>, a number of random sample <span class="math inline">\(N_{aa}\)</span> is drawn uniformly in the pixel region <span class="math inline">\((x,y) + [0,1]^2\)</span>. The value of the pixel is given by the average of the sample of the pixels.</p>
+<h2 class="unnumbered" id="task-3-ray-triangle-intersection">Task 3: Ray-Triangle Intersection</h2>
+<p>For a given ray with origin <span class="math inline">\(\mathbf{o}\)</span> and direction <span class="math inline">\(\mathbf{d}\)</span>, and a triangle with vertices at <span class="math inline">\(\mathbf{x}_1\)</span>, <span class="math inline">\(\mathbf{x}_2\)</span>, <span class="math inline">\(\mathbf{x}_3\)</span>, any point in the plane can be expressed in the barycentric coordinate of the triangle: <span class="math display">\[\{\alpha\mathbf{x}_1+\beta\mathbf{x}_2+\gamma\mathbf{x}_3|\alpha,\beta,\gamma\in\mathbb{R}, \alpha+\beta+\gamma=1\}\]</span></p>
+<p>Therefore, suppose the ray intersection the plane of the triangle at parameter <span class="math inline">\(t\)</span> and position of barycentric coordinate <span class="math inline">\((\alpha, \beta,\gamma)\)</span>. Then <span class="math display">\[\begin{dcases}
+\alpha\mathbf{x}_1+\beta\mathbf{x}_2+\gamma\mathbf{x}_3 = \mathbf{o}+t\mathbf{d} \\
+\alpha + \beta + \gamma = 1
+\end{dcases}\]</span> <span class="math display">\[\begin{bmatrix}
+\mathbf{x}_1 &amp; \mathbf{x}_2 &amp; \mathbf{x}_3 &amp; -\mathbf{d} \\
+1 &amp; 1 &amp; 1 &amp; 0
+\end{bmatrix}
+\begin{bmatrix}
+\alpha \\ \beta \\ \gamma \\ t
+\end{bmatrix}
+=
+\begin{bmatrix}
+\mathbf{o} \\
+1
+\end{bmatrix}\]</span></p>
+<p>The determinant of the matrix is: <span class="math display">\[\mathrm{det}\left(\begin{bmatrix}
+\mathbf{x}_1 &amp; \mathbf{x}_2 &amp; \mathbf{x}_3 &amp; -\mathbf{d} \\
+1 &amp; 1 &amp; 1 &amp; 0
+\end{bmatrix}\right) = \mathbf{d}\cdot((\mathbf{x}_2-\mathbf{x}_1)\times(\mathbf{x}_3-\mathbf{x}_1))\]</span></p>
+<p>Therefore, the matrix is invertible iff its determinant is not zero, that is, <span class="math inline">\(\mathbf{d}\)</span> is not parallel to the plane. In this case <span class="math display">\[\label{eq:ray_triangle_intersection}
+    \begin{bmatrix}
+\alpha \\ \beta \\ \gamma \\ t
+\end{bmatrix}
+=
+\begin{bmatrix}
+\mathbf{x}_1 &amp; \mathbf{x}_2 &amp; \mathbf{x}_3 &amp; -\mathbf{d} \\
+1 &amp; 1 &amp; 1 &amp; 0
+\end{bmatrix}^{-1}
+\begin{bmatrix}
+\mathbf{o} \\
+1
+\end{bmatrix}\]</span></p>
+<p>The intersection is valid iff <span class="math inline">\(\alpha,\beta,\gamma&gt;0\)</span> and <span class="math inline">\(t\)</span> lies in its range.</p>
+<p>The normal at the intersection point is directly given by the barycentric interpolation of the normal vectors on the vertices.</p>
+<p>If an intersection is valid, then the maximum parameter value should be updated as the current intersection <span class="math inline">\(t\)</span> value.</p>
+<h2 class="unnumbered" id="task-4-ray-sphere-intersection">Task 4: Ray-Sphere Intersection</h2>
+<p>For a given ray with origin <span class="math inline">\(\mathbf{o}\)</span> and direction <span class="math inline">\(\mathbf{d}\)</span>, and a sphere centered at <span class="math inline">\(\mathbf{c}\)</span> with radius <span class="math inline">\(r\)</span>, for any point on the ray <span class="math inline">\(\mathbf{o}+t\mathbf{d}\)</span> such that it is on the sphere <span class="math inline">\(\partial B(\mathbf{c}, r)\)</span>, it must satisfies: <span class="math display">\[\|\mathbf{o}+t\mathbf{d} - \mathbf{c}\|^2 = r^2\]</span> <span class="math display">\[t^2\|\mathbf{d}\|^2 + 2t\mathbf{d}\cdot(\mathbf{o}-\mathbf{c}) + \|\mathbf{o}-\mathbf{c}\|^2-r^2 = 0\]</span> <span class="math display">\[\label{eq:ray_sphere_intersection}
+    t^2 + 2t\mathbf{d}\cdot(\mathbf{o}-\mathbf{c}) + \|\mathbf{o}-\mathbf{c}\|^2-r^2 = 0\]</span></p>
+<p>This quadratic has a solution iff <span class="math display">\[0\leq (2\mathbf{d}\cdot(\mathbf{o}-\mathbf{c}))^2 - 4(\|\mathbf{o}-\mathbf{c}\|^2-r^2) = 4((\mathbf{d}\cdot(\mathbf{o}-\mathbf{c}))^2 - \|\mathbf{o}-\mathbf{c}\|^2 + r^2)\]</span> <span class="math display">\[(\mathbf{d}\cdot(\mathbf{o}-\mathbf{c}))^2 - \|\mathbf{o}-\mathbf{c}\|^2 + r^2 \geq 0\]</span></p>
+<p>The solution is given by: <span class="math display">\[\{-\mathbf{d}\cdot(\mathbf{o}-\mathbf{c}) - \sqrt{(\mathbf{d}\cdot(\mathbf{o}-\mathbf{c}))^2 - \|\mathbf{o}-\mathbf{c}\|^2 + r^2}, -\mathbf{d}\cdot(\mathbf{o}-\mathbf{c}) + \sqrt{(\mathbf{d}\cdot(\mathbf{o}-\mathbf{c}))^2 - \|\mathbf{o}-\mathbf{c}\|^2 + r^2}\}\]</span></p>
+<p>Suppose the solution exists and <span class="math display">\[\begin{dcases}
+t_1 = -\mathbf{d}\cdot(\mathbf{o}-\mathbf{c}) - \sqrt{(\mathbf{d}\cdot(\mathbf{o}-\mathbf{c}))^2 - \|\mathbf{o}-\mathbf{c}\|^2 + r^2} \\
+t_2 = -\mathbf{d}\cdot(\mathbf{o}-\mathbf{c}) + \sqrt{(\mathbf{d}\cdot(\mathbf{o}-\mathbf{c}))^2 - \|\mathbf{o}-\mathbf{c}\|^2 + r^2}\}
+\end{dcases}\]</span></p>
+<p>Then <span class="math inline">\(t_1\leq t_2\)</span>. The ray has a section between <span class="math inline">\(t_{\max}\)</span> and <span class="math inline">\(t_{\min}\)</span>. The following situations are considered:</p>
+<ul>
+<li><p><span class="math inline">\(t_1\leq t_2\leq t_{\min}\leq t_{\max}\)</span> (one comparison needed <span class="math inline">\(t_2\leq t_{\min}\)</span>): No intersection is found.</p></li>
+<li><p><span class="math inline">\(t_{\min} \leq t_{\max} \leq t_1\leq t_2\)</span> (one comparison needed <span class="math inline">\(t_{\max}\leq t_1\)</span>): No intersection is found.</p></li>
+<li><p><span class="math inline">\(t_1\leq t_{\min} \leq t_{\max} \leq t_2\)</span>: No intersection is found.</p></li>
+<li><p><span class="math inline">\(t_1\leq t_{\min} \leq t_2 \leq t_{\max}\)</span>: Intersection is found at <span class="math inline">\(t_2\)</span>.</p></li>
+<li><p><span class="math inline">\(t_{\min} \leq t_1\leq t_2\leq t_{\max}\)</span>: Intersection is found at <span class="math inline">\(t_1\)</span>.</p></li>
+<li><p><span class="math inline">\(t_{\min} \leq t_1\leq t_{\max}\leq t_{2}\)</span>: Intersection is found at <span class="math inline">\(t_1\)</span>.</p></li>
+</ul>
+<p>The normal at the intersection point <span class="math inline">\(\mathbf{p}\)</span> given by the method above is <span class="math inline">\(\frac{\mathbf{p}-\mathbf{c}}{r}\)</span>.</p>
+<h2 class="unnumbered" id="normal-shading-images">Normal Shading Images</h2>
+<p>The rendering of of <code>sky/CBspheres.dae</code> with normal shading is included as Fig.<a href="#fig:P1_img_spheres" data-reference-type="ref" data-reference="fig:P1_img_spheres">1</a>.</p>
+<p>Following flags are used: <code>-r 480 360</code></p>
+<p>The rendering of of <code>sky/CBbunny.dae</code> with normal shading is included as Fig.<a href="#fig:P1_img_bunny" data-reference-type="ref" data-reference="fig:P1_img_bunny">2</a>.</p>
+<p>Following flags are used: <code>-r 480 360</code></p>
+<p>The rendering of of <code>sky/CBdragon.dae</code> with normal shading is included as Fig.<a href="#fig:P1_img_dragon" data-reference-type="ref" data-reference="fig:P1_img_dragon">3</a>.</p>
+<p>Following flags are used: <code>-r 480 360</code></p>
+<figure>
+<img src="CS 184 HW3.1 P1 img spheres.png" id="fig:P1_img_spheres" style="width:70.0%" alt="Rendering of sky/CBspheres.dae with normal shading and the following flags: -r 480 360" /><figcaption aria-hidden="true">Rendering of <code>sky/CBspheres.dae</code> with normal shading and the following flags:<br />
+<code>-r 480 360</code></figcaption>
+</figure>
+<figure>
+<img src="CS 184 HW3.1 P1 img bunny.png" id="fig:P1_img_bunny" style="width:70.0%" alt="Rendering of sky/CBbunny.dae with normal shading and the following flags: -r 480 360" /><figcaption aria-hidden="true">Rendering of <code>sky/CBbunny.dae</code> with normal shading and the following flags:<br />
+<code>-r 480 360</code></figcaption>
+</figure>
+<figure>
+<img src="CS 184 HW3.1 P1 img dragon.png" id="fig:P1_img_dragon" style="width:70.0%" alt="Rendering of sky/CBdragon.dae with normal shading and the following flags: -r 480 360" /><figcaption aria-hidden="true">Rendering of <code>sky/CBdragon.dae</code> with normal shading and the following flags:<br />
+<code>-r 480 360</code></figcaption>
+</figure>
+<h1 class="unnumbered" id="part-2-bounding-volume-hierarchy">Part 2: Bounding Volume Hierarchy</h1>
+<h2 class="unnumbered" id="task-1-constructing-the-bvh">Task 1: Constructing the BVH</h2>
+<p>A bounding volume Hierarchy is a tree structure that represents the partition of primitives in the scene. Each node of a tree represents a collection of primitives, which may have children nodes or may be a leaf.</p>
+<p>If the node is not a leaf, then it contains a bounding box of the primitives it contains. Moreover, it contains pointers to the left and right child nodes. If the node is leaf, then it contains a bounding box as well as pointers to primitives.</p>
+<p>The pseudocode for building a tree is given as below:</p>
+<p><span> <span class="math inline">\(n_0\gets\)</span> a leaf with elements <span class="math inline">\(A\)</span> Set the bounding box of <span class="math inline">\(n_0\)</span> according to the set <span class="math inline">\(A\)</span> </span><span> <span class="math inline">\(L, R\gets \text{partition}(A)\)</span> <span class="math inline">\(n_l\gets\)</span> Create_BVH(<span class="math inline">\(L\)</span>, <span class="math inline">\(N_{\max}\)</span>) <span class="math inline">\(n_r\gets\)</span> Create_BVH(<span class="math inline">\(R\)</span>, <span class="math inline">\(N_{\max}\)</span>) <span class="math inline">\(n_0\gets\)</span> an intermediate node with children <span class="math inline">\(n_l\)</span> and <span class="math inline">\(n_r\)</span> Set the bounding box of <span class="math inline">\(n_0\)</span> according to the set <span class="math inline">\(A\)</span> </span></p>
+<p>The partition function of the primitives in this implementation aims to produced a balanced tree. Therefore, the partition function is implemented as:</p>
+<p>Choose a standard axis of <span class="math inline">\(\mathbb{R}^3\)</span> such that the span of primitives is the largest. Then sort the primitives by the coordinate of the centroid of the primitives on this axis. The primitives are then separated by the median of the coordinate values.</p>
+<p>The pseudocode is given by:</p>
+<p><span class="math inline">\([x_0, x_1]\times[y_0, y_1]\times [z_0, z_1]\gets\)</span> the bounding box of <span class="math inline">\(A\)</span></p>
+<p><span class="math inline">\(i\gets \underset{i\in\{x, y, z\}}{\mathrm{argmax}}(|i_1-i_0|)\)</span></p>
+<p><span class="math inline">\(A=\{a_j|j\in\mathbb{N}_+(N)\}\)</span> such that <span class="math inline">\(\forall j,k\in\mathbb{N}_+(N)\)</span> where <span class="math inline">\(j&gt;k\)</span>, <span class="math inline">\(p(a_j, i)\geq p(a_k, i)\)</span></p>
+<p><span class="math inline">\(B \gets \left\{a_j\middle|j\in\mathbb{N}_+\left(\mathrm{int}\left(\frac{N}{2}\right)\right)\right\}\)</span></p>
+<p><span class="math inline">\(C \gets A\setminus B\)</span></p>
+<h2 class="unnumbered" id="extra-credit">EXTRA CREDIT</h2>
+<p>The origin data structure keeps an array of pointers to primitives. Suppose the array is given by the sequence: <span class="math inline">\(\{a_i|i\in\mathbb{N}_+(N)\}\)</span> where <span class="math inline">\(N\in\mathbb{N}_+\)</span> is the number of primitive. The pointer is given initially by position <span class="math inline">\(1\)</span> and <span class="math inline">\(N\)</span> for the entire tree.</p>
+<p>Suppose for each node, the primitives that a node contains is specified as <span class="math inline">\(\{a_i|i\in\mathbb{Z}(i_l, i_r)\}\)</span> where <span class="math inline">\(i_l, i_r\in\mathbb{N}_+(N)\)</span> and <span class="math inline">\(i_l&lt; i_r\)</span> (this is the case in the base case where <span class="math inline">\(i_l = 1\)</span>, <span class="math inline">\(i_r=N\)</span>). Then the partition algorithm is simply the following:</p>
+<p>Sort a view of the array <span class="math inline">\(\{a_i|i\in\mathbb{Z}(i_l, i_r)\}\)</span> in place, according to the comparator described above.</p>
+<p><span class="math inline">\(i_m \gets \mathrm{int}\left(\frac{i_l+i_r}{2}\right)\)</span></p>
+<p><span class="math inline">\(B\gets \{a_i|i\in\mathbb{Z}(i_l, i_m)\}\)</span> (This is done directly by passing in pointers to <span class="math inline">\(a_{i_l}\)</span> and <span class="math inline">\(a_{i_m}\)</span>)</p>
+<p><span class="math inline">\(C\gets \{a_i|i\in\mathbb{Z}(i_m+1, i_r)\}\)</span> (This is done directly by passing in pointers to <span class="math inline">\(a_{i_m}\)</span> and <span class="math inline">\(a_{i_r}\)</span>)</p>
+<p>Therefore, no part of the original array of pointers to primitive are replicated. Each node corresponds to a segments of an array. Each time a node is created, the array is sorted in place and separated into two smaller parts corresponding to the two children. Therefore, no additional memory is required to store the pointers to primitives.</p>
+<h2 class="unnumbered" id="task-2-intersecting-the-bounding-box">Task 2: Intersecting the Bounding Box</h2>
+<p>Suppose a ray is given with starting point <span class="math inline">\(\mathbf{o}=(o_x,o_y,o_z)\in\mathbb{R}^3\)</span> and direction <span class="math inline">\(\mathbf{d}=(d_x,d_y,d_z)\in\partial B(\mathbf{0},1)\subseteq\mathbb{R}^3\)</span>. Suppose a bounding box is given as <span class="math inline">\(B=[x_0,x_1]\times[y_0,y_1]\times[z_0,z_1]\)</span>.</p>
+<p>The set of all points in the ray with time range <span class="math inline">\(R=(t_{\min},t_{\max})\subseteq\mathbb{R}_+\)</span> is given by: <span class="math display">\[\begin{aligned}
+    &amp;\{\mathbf{p}=(p_x,p_y,p_z)=\mathbf{o}+t\mathbf{d}|t\in R, \mathbf{p}\in B=[x_0,x_1]\times[y_0,y_1]\times[z_0,z_1]\} \\
+    =&amp; \{\mathbf{o}+t\mathbf{d}|t\in R, o_x+td_x\in[x_0,x_1], o_y+td_y\in[y_0,y_1], o_z+td_z\in[z_0,z_1]\} \\
+    =&amp; \{\mathbf{o}+t\mathbf{d}|t\in R, td_x\in[x_0-o_x,x_1-o_x], td_y\in[y_0-o_y,y_1-o_y], td_z\in[z_0-o_z,z_1-o_z]\}\end{aligned}\]</span></p>
+<p>The condition that the set is nonempty is equivalent to the following:</p>
+<p><span class="math inline">\(\exists t\in R\)</span> such that <span class="math inline">\(\forall i\in\{x, y, z\}\)</span>, if <span class="math inline">\(d_i=0\)</span>, <span class="math inline">\(0\in[i_0-o_i, i_1-o_i]\)</span>, otherwise, <span class="math inline">\(t\in\left[\frac{i_0-o_i}{d_i}, \frac{i_1-o_i}{d_i}\right]\)</span></p>
+<p>which is equivalent to the following:</p>
+<p>Suppose <span class="math inline">\(I=\{i\in\{x, y, z\}|d_i=0\}\)</span> and <span class="math inline">\(\bar{I}=\{x, y, z\}\setminus I\)</span>. Then <span class="math inline">\(\forall i\in I\)</span>, <span class="math inline">\(0\in[i_0-o_i, i_1-o_i]\)</span>. Moreover, <span class="math display">\[\displaystyle\bigcap\limits_{i\in \bar{I}} \left[\frac{i_0-o_i}{d_i}, \frac{i_1-o_i}{d_i}\right] \neq \emptyset\]</span></p>
+<p>which is equivalent to the following:</p>
+<p>Suppose <span class="math inline">\(I=\{i\in\{x, y, z\}|d_i=0\}\)</span> and <span class="math inline">\(\bar{I}=\{x, y, z\}\setminus I\)</span>. Then <span class="math inline">\(\forall i\in I\)</span>, <span class="math inline">\(0\in[i_0-o_i, i_1-o_i]\)</span>. Moreover, <span class="math display">\[\underset{i\in \bar{I}}{\max}\left(\min\left(\frac{i_0-o_i}{d_i}, \frac{i_1-o_i}{d_i}\right)\right) \leq \underset{i\in \bar{I}}{\min}\left(\max\left(\frac{i_0-o_i}{d_i}, \frac{i_1-o_i}{d_i}\right)\right)\]</span></p>
+<h2 class="unnumbered" id="task-3-intersecting-the-bvh">Task 3: Intersecting the BVH</h2>
+<p>The intersection test of a ray to a bounding volume hierarchy is semantically a depth-first search where the branches could be pruned. That is, the depth-first search is searching a a node where the ray could not insect the bounding box of the node, the bounding boxes of the descendants of the node must be contained in the parent bounding box, so the ray will not intersect their bounding boxes as well. The search could be terminated on this node.</p>
+<p>The algorithm is implemented as the following:</p>
+<h2 class="unnumbered" id="normal-shading-images-1">Normal Shading Images</h2>
+<p>The rendering of <code>meshedit/cow.dae</code> with normal shading is included as Fig.<a href="#fig:P2_img_cow" data-reference-type="ref" data-reference="fig:P2_img_cow">4</a>.</p>
+<p>Following flags are used: <code>-t 8 -r 800 600</code></p>
+<p>The rendering of <code>meshedit/maxplanck.dae</code> with normal shading is included as Fig.<a href="#fig:P2_img_maxplanck" data-reference-type="ref" data-reference="fig:P2_img_maxplanck">5</a>.</p>
+<p>Following flags are used: <code>-t 8 -r 800 600</code></p>
+<p>The rendering of <code>meshedit/CBlucy.dae</code> with normal shading is included as Fig.<a href="#fig:P2_img_lucy" data-reference-type="ref" data-reference="fig:P2_img_lucy">6</a>.</p>
+<p>Following flags are used: <code>-t 8 -r 800 600</code></p>
+<figure>
+<img src="CS 184 HW3.1 P2 img cow.png" id="fig:P2_img_cow" style="width:70.0%" alt="Rendering of meshedit/cow.dae with normal shading and the following flags: -t 8 -r 800 600" /><figcaption aria-hidden="true">Rendering of <code>meshedit/cow.dae</code> with normal shading and the following flags:<br />
+<code>-t 8 -r 800 600</code></figcaption>
+</figure>
+<figure>
+<img src="CS 184 HW3.1 P2 img maxplanck.png" id="fig:P2_img_maxplanck" style="width:70.0%" alt="Rendering of meshedit/maxplanck.dae with normal shading and the following flags: -t 8 -r 800 600" /><figcaption aria-hidden="true">Rendering of <code>meshedit/maxplanck.dae</code> with normal shading and the following flags:<br />
+<code>-t 8 -r 800 600</code></figcaption>
+</figure>
+<figure>
+<img src="CS 184 HW3.1 P2 img lucy.png" id="fig:P2_img_lucy" style="width:70.0%" alt="Rendering of meshedit/CBlucy.dae with normal shading and the following flags: -t 8 -r 800 600" /><figcaption aria-hidden="true">Rendering of <code>meshedit/CBlucy.dae</code> with normal shading and the following flags:<br />
+<code>-t 8 -r 800 600</code></figcaption>
+</figure>
+<h2 class="unnumbered" id="timing-comparison">Timing Comparison</h2>
+<p>The table of the timing comparison between with or without bounding volume hierarchy is given as Tab.<a href="#tab:P2_timing" data-reference-type="ref" data-reference="tab:P2_timing">1</a>. As is shown in the table, the time used to render without bounding volume hierarchy increases drastically with the complexity (number of primitives). However, the time used to render with bounding volume hierarchy remains approximately constant.</p>
+<div id="tab:P2_timing">
+<table>
+<caption><span class="math inline">\(t_0\)</span> is the rendering time without bounding volume hierarchy. <span class="math inline">\(t_{BVH}\)</span> is the rendering time with bounding volume hierarchy. The device is: MacBook Pro (16-inch, 2019) with 2.3 GHz 8-Core Intel Core i9. </caption>
+<thead>
+<tr class="header">
+<th style="text-align: center;">File</th>
+<th style="text-align: center;">Number of primitives</th>
+<th style="text-align: center;"><span class="math inline">\(t_0\)</span></th>
+<th style="text-align: center;"><span class="math inline">\(t_{BVH}\)</span></th>
+<th style="text-align: center;">Flags</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: center;"><code>meshedit/cow.dae</code></td>
+<td style="text-align: center;"><span class="math inline">\(5856\)</span></td>
+<td style="text-align: center;"><span class="math inline">\(43.0572\mathrm{s}\)</span></td>
+<td style="text-align: center;"><span class="math inline">\(0.0891\mathrm{s}\)</span></td>
+<td style="text-align: center;"><code>-t 8 -r 800 600</code></td>
+</tr>
+<tr class="even">
+<td style="text-align: center;"><code>meshedit/maxplanck.dae</code></td>
+<td style="text-align: center;"><span class="math inline">\(50801\)</span></td>
+<td style="text-align: center;"><span class="math inline">\(445.3300\mathrm{s}\)</span></td>
+<td style="text-align: center;"><span class="math inline">\(0.1094\mathrm{s}\)</span></td>
+<td style="text-align: center;"><code>-t 8 -r 800 600</code></td>
+</tr>
+<tr class="odd">
+<td style="text-align: center;"><code>sky/CBlucy.dae</code></td>
+<td style="text-align: center;"><span class="math inline">\(133796\)</span></td>
+<td style="text-align: center;"><span class="math inline">\(&gt;1000\mathrm{s}\)</span></td>
+<td style="text-align: center;"><span class="math inline">\(0.0943\mathrm{s}\)</span></td>
+<td style="text-align: center;"><code>-t 8 -r 800 600</code></td>
+</tr>
+</tbody>
+</table>
+</div>
+<h1 class="unnumbered" id="part-3-direct-illumination">Part 3: Direct Illumination</h1>
+<h2 class="unnumbered" id="task-1-diffuse-bsdf">Task 1: Diffuse BSDF</h2>
+<p>A diffuse bidirectional scattering distribution function is defined as a bidirectional scattering distribution that is a constant on the outer hemisphere and zero in the inner hemisphere of <span class="math inline">\(\partial B(\mathbf{0}, 1)\)</span> with respect to the normal <span class="math inline">\(\mathbf{n}\)</span>.</p>
+<p>Suppose the bidirectional scattering distribution function is given by a constant <span class="math inline">\(f\)</span> in the outer hemisphere <span class="math inline">\(H\)</span>. The total incoming irradiance is given by: <span class="math display">\[\displaystyle\int\limits_{\partial B(\mathbf{0},1)}L_i(\mathbf{e}_i)\mathbf{e}_i\cdot\mathbf{n}\,\mathrm{d}\mathbf{e}_i = \displaystyle\int\limits_{H}L_i(\mathbf{e}_i)\mathbf{e}_i\cdot\mathbf{n}\,\mathrm{d}\mathbf{e}_i\]</span></p>
+<p>The total outgoing irradiance is given by: <span class="math display">\[\begin{aligned}
+    \displaystyle\int\limits_{\partial B(\mathbf{0},1)}L_o(\mathbf{e}_r)\mathbf{e}_r\cdot\mathbf{n}\,\mathrm{d}\mathbf{e}_r &amp;= \displaystyle\int\limits_{\partial B(\mathbf{0},1)}\left(\displaystyle\int\limits_{\partial B(\mathbf{0},1)}f(\mathbf{e}_i,\mathbf{e}_r)L_i(\mathbf{e}_i)\mathbf{e}_i\cdot\mathbf{n}\,\mathrm{d}\mathbf{e}_i\right)\mathbf{e}_r\cdot\mathbf{n}\,\mathrm{d}\mathbf{e}_r \\
+    &amp;= \displaystyle\int\limits_{H}\left(\displaystyle\int\limits_{H}fL_i(\mathbf{e}_i)\mathbf{e}_i\cdot\mathbf{n}\,\mathrm{d}\mathbf{e}_i\right)\mathbf{e}_r\cdot\mathbf{n}\,\mathrm{d}\mathbf{e}_r \\
+    &amp;= f\left(\displaystyle\int\limits_{H}\mathbf{e}_r\cdot\mathbf{n}\,\mathrm{d}\mathbf{e}_r\right)\left(\displaystyle\int\limits_{H}L_i(\mathbf{e}_i)\mathbf{e}_i\cdot\mathbf{n}\,\mathrm{d}\mathbf{e}_i\right)\end{aligned}\]</span></p>
+<p>The total outgoing irradiance must be the total incoming irradiance multiplied by the reflectance <span class="math inline">\(\alpha\)</span>. Therefore, <span class="math display">\[f\left(\displaystyle\int\limits_{H}\mathbf{e}_r\cdot\mathbf{n}\,\mathrm{d}\mathbf{e}_r\right)\left(\displaystyle\int\limits_{H}L_i(\mathbf{e}_i)\mathbf{e}_i\cdot\mathbf{n}\,\mathrm{d}\mathbf{e}_i\right) = \alpha \displaystyle\int\limits_{H}L_i(\mathbf{e}_i)\mathbf{e}_i\cdot\mathbf{n}\,\mathrm{d}\mathbf{e}_i\]</span> <span class="math display">\[\alpha = f\left(\displaystyle\int\limits_{H}\mathbf{e}_r\cdot\mathbf{n}\,\mathrm{d}\mathbf{e}_r\right) = f\displaystyle\int_{\theta=0}^{\frac{\pi}{2}}\displaystyle\int_{\phi=0}^{2\pi}\cos(\theta)\sin(\theta)\,\mathrm{d}\theta\,\mathrm{d}\phi = f\pi\]</span> <span class="math display">\[f = \frac{\alpha}{\pi}\]</span></p>
+<p>Therefore, the bidirectional scattering distribution function on a diffuse surface with reflectance <span class="math inline">\(\alpha\)</span> is given by: <span class="math display">\[f = \left((\mathbf{e}_i,\mathbf{e}_r) \mapsto
+\begin{dcases}
+\frac{\alpha}{\pi} &amp; ,\mathbf{e}_i,\mathbf{e}_r\in H \\
+0 &amp; ,\text{otherwise}
+\end{dcases}
+\right)\]</span></p>
+<p>Note that in terms of the color (wavelength), this is interpreted as for a specific color (wavelength).</p>
+<h2 class="unnumbered" id="task-2-zero-bounce-illumination">Task 2: Zero-bounce Illumination</h2>
+<p>Zero-bounce illumination is the ray that goes directly from the source to the camera with no change in the ray property. Therefore, given an intersection of the ray, the zero-bounce illumination is simply the emission radiance of the intersection point.</p>
+<h2 class="unnumbered" id="task-3-direct-lighting-with-uniform-hemisphere-sampling">Task 3: Direct Lighting with Uniform Hemisphere Sampling</h2>
+<p>Direct lighting is the lighting scheme such that only zero-and-one-bounce illumination is considered. Therefore, the ray that is traced with only 0 or 1 change in the ray property.</p>
+<p>Given a ray that intersect the scene at position <span class="math inline">\(p\)</span> in direction <span class="math inline">\(\mathbf{e}_0\)</span>, the received radiance is given by: <span class="math display">\[L_e(-\mathbf{e}_0) + \displaystyle\int\limits_{\partial B(\mathbf{0}, 1)}f(\mathbf{e}_i,-\mathbf{e}_0)L_i(\mathbf{e}_i)\mathbf{e}_i\cdot\mathbf{n}\,\mathrm{d}\mathbf{e}_i\]</span> where <span class="math inline">\(L_e\)</span> is a function that maps a direction to the emitted radiance of the point, <span class="math inline">\(L_i\)</span> is a function that maps a direction to the incoming radiance of the point, <span class="math inline">\(\mathbf{n}\)</span> is the outward surface normal, and <span class="math inline">\(f\)</span> is the bidirectional scattering distribution function at the point. Moreover, <span class="math inline">\(L_i\)</span> is the zero-bounce illumination of the point since this is the one-bounce illumination term in direct illumination.</p>
+<p>Suppose <span class="math inline">\(f\)</span> is non-zero only when evaluated in <span class="math inline">\(H\times H\)</span> where <span class="math inline">\(H\)</span> is the outer hemisphere. Then the received radiance is given by: <span class="math display">\[L_e(-\mathbf{e}_0) + \displaystyle\int\limits_{H}f(\mathbf{e}_i,-\mathbf{e}_0)L_i(\mathbf{e}_i)\mathbf{e}_i\cdot\mathbf{n}\,\mathrm{d}\mathbf{e}_i\]</span></p>
+<p>Suppose <span class="math inline">\(\{\mathbf{E}_j|j\in\mathbb{N}_+(N)\}\)</span> is a sequence of independent identically distributed random variable in the outer hemisphere <span class="math inline">\(H\)</span> with probability density function <span class="math inline">\(p\)</span> such that <span class="math inline">\(p\)</span> is nonzero in <span class="math inline">\(H\)</span>. Then by Monte-Carlo integration, the received radiance is given by the expected value of the following random variable: <span class="math display">\[\label{eq:direct_illumination_hemisphere}
+    L_e(-\mathbf{e}_0) + \frac{1}{N}\displaystyle\sum_{i=1}^N\frac{f(\mathbf{E}_j,-\mathbf{e}_0)L_i(\mathbf{E}_j)\mathbf{E}_j\cdot\mathbf{n}}{p(\mathbf{E}_j)}\]</span></p>
+<p>Therefore, this is the estimator for the direct illumination in the direction <span class="math inline">\(\mathbf{e}_0\)</span>.</p>
+<p>In the uniform sampling scheme, <span class="math inline">\(p\)</span> is a constant function, which is given by a constant of: <span class="math display">\[p=\dfrac{1}{\displaystyle\int\limits_{H}\mathrm{d}\mathbf{e}} = \frac{1}{2\pi}\]</span></p>
+<h2 class="unnumbered" id="task-4-direct-lighting-by-importance-sampling-lights">Task 4: Direct Lighting by Importance Sampling Lights</h2>
+<p>In direct lighting scheme, the received radiance as in the previous task is given by: <span class="math display">\[L_e(\mathbf{p}, -\mathbf{e}_0) + \displaystyle\int\limits_{H}f(\mathbf{e}_i,-\mathbf{e}_0)L_i(\mathbf{e}_i)\mathbf{e}_i\cdot\mathbf{n}\,\mathrm{d}\mathbf{e}_i\]</span> where <span class="math inline">\(L_i\)</span> is the zero-bounce illumination of the point.</p>
+<p>Suppose there are multiple lights in the scene <span class="math inline">\(S_l\)</span>. Suppose <span class="math inline">\(S_{lp}\)</span> and <span class="math inline">\(S_{le}\)</span> is a partition of <span class="math inline">\(S_l\)</span> such that <span class="math inline">\(S_{lp}\)</span> is the set of point lights and <span class="math inline">\(S_{le}\)</span> is the set of extended light.</p>
+<p>For a point light source <span class="math inline">\(s_{lp}\in S_{lp}\)</span>, the radiance of point light source at point <span class="math inline">\(\mathbf{p}_{s_{lp}}\)</span> on a point <span class="math inline">\(\mathbf{p}\in\mathbb{R}^3\)</span> can be given by <span class="math inline">\(\frac{E_{s_{lp}}}{\|\mathbf{p}-\mathbf{p}_{s_{lp}}\|^2}\delta\left(\frac{\mathbf{p}-\mathbf{p}_{s_{lp}}}{\|\mathbf{p}-\mathbf{p}_{s_{lp}}\|}\right)\)</span>, where <span class="math inline">\(E_{s_{lp}}\in\mathbb{R}\)</span>. Therefore, the one-bounce illumination contribution of the point light source is given by; <span class="math display">\[f\left(\frac{\mathbf{p}-\mathbf{p}_{s_{lp}}}{\|\mathbf{p}-\mathbf{p}_{s_{lp}}\|}, -\mathbf{e}_0\right)V(\mathbf{p}, \mathbf{p}_{s_{lp}})\frac{E_{s_{lp}}}{\|\mathbf{p}-\mathbf{p}_{s_{lp}}\|^2}\frac{\mathbf{p}_{s_{lp}}-\mathbf{p}}{\|\mathbf{p}-\mathbf{p}_{s_{lp}}\|}\cdot\mathbf{n}\]</span> where <span class="math inline">\(V\)</span> is the binary visibility function of the scene.</p>
+<p>For an extended light source <span class="math inline">\(s_{le}\in S_{le}\)</span>, suppose the set of all points on the light source is <span class="math inline">\(A_{s_{le}}\)</span>. Then the radiance from point <span class="math inline">\(\mathbf{p}_0\in A_{s_{le}}\)</span> to <span class="math inline">\(\mathbf{p}\)</span> is <span class="math inline">\(L_e\left(\mathbf{p}_0, \frac{\mathbf{p}-\mathbf{p}_0}{\|\mathbf{p}-\mathbf{p}_0\|}\right)\)</span>. Therefore, the one-bounce illumination contribution of the extended light source is given by: <span class="math display">\[\displaystyle\int\limits_{A_{s_{lp}}}f\left(\frac{\mathbf{p}-\mathbf{p}_0}{\|\mathbf{p}-\mathbf{p}_0\|}, -\mathbf{e}_0\right)V(\mathbf{p}, \mathbf{p}_0)L_e\left(\mathbf{p}_0, \frac{\mathbf{p}-\mathbf{p}_0}{\|\mathbf{p}-\mathbf{p}_0\|}\right)\frac{(\mathbf{p}_0-\mathbf{p})\cdot\mathbf{n}}{\|\mathbf{p}-\mathbf{p}_0\|^4}(\mathbf{p}-\mathbf{p}_0)\cdot\,\mathrm{d}\mathbf{S}(\mathbf{p}_0)\]</span> where <span class="math inline">\(V\)</span> is the binary visibility function of the scene.</p>
+<p>Suppose <span class="math inline">\(\mathbf{n}_{s_{le}}\)</span> maps a point in <span class="math inline">\(A_{s_{le}}\)</span> to its unit outward normal. Then the integral is given as: <span class="math display">\[\displaystyle\int\limits_{A_{s_{lp}}}f\left(\frac{\mathbf{p}-\mathbf{p}_0}{\|\mathbf{p}-\mathbf{p}_0\|}, -\mathbf{e}_0\right)V(\mathbf{p}, \mathbf{p}_0)L_e\left(\mathbf{p}_0, \frac{\mathbf{p}-\mathbf{p}_0}{\|\mathbf{p}-\mathbf{p}_0\|}\right)\frac{((\mathbf{p}_0-\mathbf{p})\cdot\mathbf{n})((\mathbf{p}-\mathbf{p}_0)\cdot\mathbf{n}_{s_{le}}(\mathbf{p}_0))}{\|\mathbf{p}-\mathbf{p}_0\|^4}\,\mathrm{d}^2\mathbf{p}_0\]</span></p>
+<p>Suppose <span class="math inline">\(\{\mathbf{P}_{j, s_{le}}|j\in\mathbb{N}_+(N_{s_{le}})\}\)</span> is a sequence of independent identically distributed random variable in <span class="math inline">\(A_{s_{le}}\)</span> with probability density function <span class="math inline">\(p\)</span> such that <span class="math inline">\(p\)</span> is nonzero in <span class="math inline">\(\{\mathbf{p_0}\in A_{s_{le}}|V(\mathbf{p},\mathbf{p}_0)\}\)</span>. Then by Monte-Carlo integration, the one-bounce illumination contribution of the extended light source is given by the expected value of the following random variable: <span class="math display">\[\frac{1}{N_{s_{le}}}\displaystyle\sum_{i=1}^{N_{s_{le}}}f\left(\mathbf{E}_{j, s_{le}}, -\mathbf{e}_0\right)V(\mathbf{p}, \mathbf{P}_{j, s_{le}})L_e\left(\mathbf{P}_{j, s_{le}}, \mathbf{E}_{j, s_{le}}\right) \frac{(-\mathbf{E}_{j, s_{le}}\cdot\mathbf{n})(\mathbf{E}_{j, s_{le}}\cdot\mathbf{n}_{s_{le}}(\mathbf{P}_{j, s_{le}}))}{\|\mathbf{p}-\mathbf{P}_{j, s_{le}}\|^2}\]</span> where <span class="math inline">\(\forall j\in\mathbb{N}_+(N_{s_{le}})\)</span>, <span class="math inline">\(\mathbf{E}_{j, s_{le}} = \dfrac{\mathbf{p}-\mathbf{P}_{j, s_{le}}}{\|\mathbf{p}-\mathbf{P}_{j, s_{le}}\|}\)</span></p>
+<p>Therefore, the total direct illumination radiance is given by: <span class="math display">\[\label{eq:direct_illumination_lighting}
+    \begin{aligned}
+    &amp;L_e(\mathbf{p}, -\mathbf{e}_0)\\
+    +&amp;\displaystyle\sum_{s_{lp}\in S_{lp}}  f\left(\frac{\mathbf{p}-\mathbf{p}_{s_{lp}}}{\|\mathbf{p}-\mathbf{p}_{s_{lp}}\|}, -\mathbf{e}_0\right)V(\mathbf{p}, \mathbf{p}_{s_{lp}})\frac{E_{s_{lp}}}{\|\mathbf{p}-\mathbf{p}_{s_{lp}}\|^2}\frac{\mathbf{p}_{s_{lp}}-\mathbf{p}}{\|\mathbf{p}-\mathbf{p}_{s_{lp}}\|}\cdot\mathbf{n} \\
+    + &amp; \displaystyle\sum_{s_{le}\in S_{le}}\frac{1}{N_{s_{le}}}\displaystyle\sum_{i=1}^{N_{s_{le}}}f\left(\mathbf{E}_{j, s_{le}}, -\mathbf{e}_0\right)V(\mathbf{p}, \mathbf{P}_{j, s_{le}})L_e\left(\mathbf{P}_{j, s_{le}}, \mathbf{E}_{j, s_{le}}\right) \frac{(-\mathbf{E}_{j, s_{le}}\cdot\mathbf{n})(\mathbf{E}_{j, s_{le}}\cdot\mathbf{n}_{s_{le}}(\mathbf{P}_{j, s_{le}}))}{\|\mathbf{p}-\mathbf{P}_{j, s_{le}}\|^2}
+\end{aligned}\]</span> where <span class="math inline">\(\forall j\in\mathbb{N}_+(N_{s_{le}})\)</span>, <span class="math inline">\(\mathbf{E}_{j, s_{le}} = \dfrac{\mathbf{p}-\mathbf{P}_{j, s_{le}}}{\|\mathbf{p}-\mathbf{P}_{j, s_{le}}\|}\)</span></p>
+<h2 class="unnumbered" id="example-images">Example Images</h2>
+<p>The renderings of <code>sky/CBbunny.dae</code> with direct illumination and low sampling rate using hemisphere and lighting sampling are included as Fig.<a href="#fig:P3_bunny_small" data-reference-type="ref" data-reference="fig:P3_bunny_small">[fig:P3_bunny_small]</a>.</p>
+<p>Following flags are used:</p>
+<p>Hemisphere sampling: <code>-t 8 -s 1 -l 1 -m 1 -r 480 360 -H</code></p>
+<p>Lighting sampling: <code>-t 8 -s 1 -l 1 -m 1 -r 480 360</code></p>
+<p>The renderings of <code>sky/CBbunny.dae</code> with direct illumination and high sampling rate using hemisphere and lighting sampling are included as Fig.<a href="#fig:P3_bunny" data-reference-type="ref" data-reference="fig:P3_bunny">[fig:P3_bunny]</a>.</p>
+<p>Following flags are used:</p>
+<p>Hemisphere sampling: <code>-t 8 -s 64 -l 32 -m 6 -r 480 360 -H</code></p>
+<p>Lighting sampling: <code>-t 8 -s 64 -l 32 -m 6 -r 480 360</code></p>
+<p>The renderings of <code>sky/dragon.dae</code> with direct illumination and high sampling rate using hemisphere and lighting sampling are included as Fig.<a href="#fig:P3_dragon" data-reference-type="ref" data-reference="fig:P3_dragon">[fig:P3_dragon]</a>. The hemisphere sampling return all black because there are only point light sources in the scene. In hemisphere sampling, the probability is almost zero in sampling a point in the hemisphere.</p>
+<p>Following flags are used:</p>
+<p>Hemisphere sampling: <code>-t 8 -s 64 -l 32 -m 6 -r 480 480 -H</code></p>
+<p>Lighting sampling: <code>-t 8 -s 64 -l 32 -m 6 -r 480 360</code></p>
+<figure>
+<img src="CS 184 HW3.1 P3 img bunny small hemisphere.png" alt="Hemisphere sampling" /><figcaption aria-hidden="true">Hemisphere sampling</figcaption>
+</figure>
+<figure>
+<img src="CS 184 HW3.1 P3 img bunny small lighting.png" alt="Lighting sampling" /><figcaption aria-hidden="true">Lighting sampling</figcaption>
+</figure>
+<figure>
+<img src="CS 184 HW3.1 P3 img bunny hemisphere.png" alt="Hemisphere sampling" /><figcaption aria-hidden="true">Hemisphere sampling</figcaption>
+</figure>
+<figure>
+<img src="CS 184 HW3.1 P3 img bunny lighting.png" alt="Lighting sampling" /><figcaption aria-hidden="true">Lighting sampling</figcaption>
+</figure>
+<figure>
+<img src="CS 184 HW3.1 P3 img dragon hemisphere.png" alt="Hemisphere sampling" /><figcaption aria-hidden="true">Hemisphere sampling</figcaption>
+</figure>
+<figure>
+<img src="CS 184 HW3.1 P3 img dragon lighting.png" alt="Lighting sampling" /><figcaption aria-hidden="true">Lighting sampling</figcaption>
+</figure>
+<h2 class="unnumbered" id="quality-vs-number-of-samples">Quality VS Number of Samples</h2>
+<p>The renderings of <code>sky/CBbunny.dae</code> with direct illumination using lighting sampling of various lighting sample rates are included as Fig.<a href="#fig:P3_bunny_rates" data-reference-type="ref" data-reference="fig:P3_bunny_rates">[fig:P3_bunny_rates]</a>.</p>
+<p>Following flags are used:</p>
+<p>Lighting sample rate <span class="math inline">\(1\)</span>: <code>-t 8 -s 1 -l 1 -m 6 -r 480 360</code></p>
+<p>Lighting sample rate <span class="math inline">\(4\)</span>: <code>-t 8 -s 1 -l 4 -m 6 -r 480 360</code></p>
+<p>Lighting sample rate <span class="math inline">\(16\)</span>: <code>-t 8 -s 1 -l 16 -m 6 -r 480 360</code></p>
+<p>Lighting sample rate <span class="math inline">\(64\)</span>: <code>-t 8 -s 1 -l 64 -m 6 -r 480 360</code></p>
+<figure>
+<img src="CS 184 HW3.1 P3 img bunny rate 1.png" alt="Lighting sample rate 1" /><figcaption aria-hidden="true">Lighting sample rate 1</figcaption>
+</figure>
+<figure>
+<img src="CS 184 HW3.1 P3 img bunny rate 4.png" alt="Lighting sample rate 4" /><figcaption aria-hidden="true">Lighting sample rate 4</figcaption>
+</figure>
+<figure>
+<img src="CS 184 HW3.1 P3 img bunny rate 16.png" alt="Lighting sample rate 16" /><figcaption aria-hidden="true">Lighting sample rate 16</figcaption>
+</figure>
+<figure>
+<img src="CS 184 HW3.1 P3 img bunny rate 64.png" alt="Lighting sample rate 64" /><figcaption aria-hidden="true">Lighting sample rate 64</figcaption>
+</figure>
+<h2 class="unnumbered" id="comparison">Comparison</h2>
+<p>Hemisphere sampling samples all directions in the hemisphere but lighting sampling samples only the direction from the lights.</p>
+<p>When randomly sampling in the hemisphere, some of the samples will not point to any light source. Therefore, by concentrating the probability density function of the Monte-Carlo estimator into the portion of the sample space where the lighting contributes the most, the variance will decrease, leading to a smoother rendering of image. Moreover, lighting sampling makes point light source possible, since the probability of sampling a point light source in hemisphere sampling is almost zero. This smoothness is clearly demonstrated in Fig.<a href="#fig:P3_bunny_small" data-reference-type="ref" data-reference="fig:P3_bunny_small">[fig:P3_bunny_small]</a>, Fig.<a href="#fig:P3_bunny" data-reference-type="ref" data-reference="fig:P3_bunny">[fig:P3_bunny]</a>, and Fig.<a href="#fig:P3_dragon" data-reference-type="ref" data-reference="fig:P3_dragon">[fig:P3_dragon]</a>.</p>
+<h1 class="unnumbered" id="part-4-global-illumination">Part 4: Global Illumination</h1>
+<h2 class="unnumbered" id="task-1-sampling-with-diffuse-bsdf">Task 1: Sampling with Diffuse BSDF</h2>
+<p>Suppose <span class="math inline">\(X\)</span> is a random variable on the sample space <span class="math inline">\(S\)</span> with probability density function <span class="math inline">\(p\)</span>. Then the function implemented returns a sample of <span class="math inline">\(X\)</span>, <span class="math inline">\(x\)</span>, in <span class="math inline">\(S\)</span> as the outer hemisphere <span class="math inline">\(\partial B(\mathbf{0},1)\cap (\mathbb{R}^2\times\mathbb{R}_+)\)</span>, the probability density function evaluated at <span class="math inline">\(x\)</span>, <span class="math inline">\(p(x)\)</span>, and the bidirectional scattering distribution function evaluated at the input incoming direction and outgoing direction <span class="math inline">\(x\)</span>.</p>
+<h2 class="unnumbered" id="task-2-global-illumination">Task 2: Global Illumination</h2>
+<p>In this task the global illumination is implemented. Suppose <span class="math inline">\(L_e\)</span> is the global emission radiance function, <span class="math inline">\(L_i\)</span> is the global incoming radiance function, <span class="math inline">\(L_o\)</span> is the global outgoing radiance function, <span class="math inline">\(f\)</span> is the global bidirectional scattering distribution function, <span class="math inline">\(t\)</span> is the transport function, and <span class="math inline">\(\mathbf{n}\)</span> is the unit outward normal field of the scene. Then the rendering equation is given as: <span class="math inline">\(\forall p\)</span> in the scene, <span class="math inline">\(\forall \mathbf{e}\in\partial B(\mathbf{0},1)\)</span>, <span class="math display">\[L_o(\mathbf{p},\mathbf{e}) = L_e(\mathbf{p},\mathbf{e}) + \displaystyle\int\limits_{\partial B(\mathbf{0},1)}f(\mathbf{p},\mathbf{e}&#39;,\mathbf{e})L_o(t(\mathbf{p, \mathbf{e}&#39;}),-\mathbf{e}&#39;)\mathbf{e}&#39;\cdot\mathbf{n}(\mathbf{p})\,\mathrm{d}^2\mathbf{e}&#39;\]</span></p>
+<p>Suppose <span class="math inline">\(\{\mathbf{E}&#39;_i|i\in\mathbb{N}_+(N)\}\)</span> where <span class="math inline">\(N\in\mathbb{N}_+\)</span> is a sequence of independent, identically distributed random variable in <span class="math inline">\(\partial B(\mathbf{0},1)\)</span> with probability density function <span class="math inline">\(p_0\)</span>. Then by Monte-Carlo integration: <span class="math display">\[L_o(\mathbf{p},\mathbf{e}) = L_e(\mathbf{p},\mathbf{e}) + \mathbb{E}\left(\frac{1}{N}\displaystyle\sum_{i=1}^{N} \frac{1}{p_0(\mathbf{E}&#39;_i)}f(\mathbf{p},\mathbf{E}&#39;_i,\mathbf{e})L_o(t(\mathbf{p, \mathbf{e}&#39;}),-\mathbf{E}&#39;_i)\mathbf{E}&#39;_i\cdot\mathbf{n}(\mathbf{p})\right)\]</span></p>
+<p>However, this is still a recursive equation of <span class="math inline">\(L_o\)</span>. To resolve this, suppose <span class="math inline">\(\mathbbm{1}\)</span> is a random variable of Bernoulli distribution <span class="math inline">\(p_t\in(0,1]\)</span>, independent of <span class="math inline">\(\{\mathbf{E}&#39;_i|i\in\mathbb{N}_+(N)\}\)</span>. Then the following equation holds: <span class="math display">\[\label{eq:global_illumination}
+    \begin{aligned}
+    L_o(\mathbf{p},\mathbf{e}) &amp;= L_e(\mathbf{p},\mathbf{e}) + \frac{\mathbb{E}(\mathbbm{1})}{p_t}\mathbb{E}\left(\frac{1}{N}\displaystyle\sum_{i=1}^{N} \frac{1}{p_0(\mathbf{E}&#39;_i)}f(\mathbf{p},\mathbf{E}&#39;_i,\mathbf{e})L_o(t(\mathbf{p, \mathbf{e}&#39;}),-\mathbf{E}&#39;_i)\mathbf{E}&#39;_i\cdot\mathbf{n}(\mathbf{p})\right) \\
+    &amp;= L_e(\mathbf{p},\mathbf{e}) + \mathbb{E}\left(\frac{\mathbbm{1}}{p_tN}\displaystyle\sum_{i=1}^{N} \frac{}{p_0(\mathbf{E}&#39;_i)}f(\mathbf{p},\mathbf{E}&#39;_i,\mathbf{e})L_o(t(\mathbf{p, \mathbf{e}&#39;}),-\mathbf{E}&#39;_i)\mathbf{E}&#39;_i\cdot\mathbf{n}(\mathbf{p})\right) \\
+\end{aligned}\]</span></p>
+<p>Therefore, whenever <span class="math inline">\(\mathbbm{1}\)</span> is sampled as <span class="math inline">\(0\)</span>, the sum does not needs to be evaluated. Therefore, the recursive is terminated. <span class="math inline">\(p_t\)</span> is dynamically set in different recursion depth. In the implementation: <span class="math display">\[p_t = \begin{dcases}
+0.4 &amp;,\text{depth} \geq 2 \\
+1 &amp;,\text{depth} = 1
+\end{dcases}\]</span></p>
+<h2 class="unnumbered" id="direct-indirect-global-illumination-comparison">Direct, Indirect, Global Illumination Comparison</h2>
+<p>The rendering of <code>sky/CBspheres_lambertian.dae</code> with global illumination using lighting sampling of pixel sample rate <span class="math inline">\(1024\)</span> is included as Fig.<a href="#fig:P4_spheres_global" data-reference-type="ref" data-reference="fig:P4_spheres_global">7</a>.</p>
+<p>Following flags are used: <code>-t 8 -s 1024 -l 16 -m 5 -r 480 360</code></p>
+<p>The renderings of <code>sky/CBspheres_lambertian.dae</code> with direct and indirect illumination using lighting sampling of pixel sample rate <span class="math inline">\(1024\)</span> are included as Fig.<a href="#fig:P4_spheres_direct_indirect" data-reference-type="ref" data-reference="fig:P4_spheres_direct_indirect">[fig:P4_spheres_direct_indirect]</a>.</p>
+<p>Following flags are used: <code>-t 8 -s 1024 -l 16 -m 5 -r 480 360</code></p>
+<figure>
+<img src="CS 184 HW3.1 P4 img spheres global.png" id="fig:P4_spheres_global" style="width:70.0%" alt="Rendering of sky/CBspheres_lambertian.dae with global illumination using lighting sampling of pixel sample rate 1024. The following flags are used: -t 8 -s 1024 -l 16 -m 5 -r 480 360" /><figcaption aria-hidden="true">Rendering of <code>sky/CBspheres_lambertian.dae</code> with global illumination using lighting sampling of pixel sample rate <span class="math inline">\(1024\)</span>. The following flags are used:<br />
+<code>-t 8 -s 1024 -l 16 -m 5 -r 480 360</code></figcaption>
+</figure>
+<figure>
+<img src="CS 184 HW3.1 P4 img spheres direct.png" alt="Direct illumination" /><figcaption aria-hidden="true">Direct illumination</figcaption>
+</figure>
+<figure>
+<img src="CS 184 HW3.1 P4 img spheres indirect.png" alt="Indirect illumination" /><figcaption aria-hidden="true">Indirect illumination</figcaption>
+</figure>
+<h2 class="unnumbered" id="quality-vs-maximum-ray-depth">Quality VS Maximum Ray Depth</h2>
+<p>The renderings of <code>sky/CBbunny.dae</code> with global illumination using lighting sampling of various maximum ray depth are included as Fig.<a href="#fig:P4_bunny_depths" data-reference-type="ref" data-reference="fig:P4_bunny_depths">[fig:P4_bunny_depths]</a>. The pixel sample rate is <span class="math inline">\(1024\)</span>.</p>
+<p>Following flags are used:</p>
+<p>Maximum ray depth <span class="math inline">\(1\)</span>: <code>-t 8 -s 1024 -l 16 -m 1 -r 480 360</code></p>
+<p>Maximum ray depth <span class="math inline">\(2\)</span>: <code>-t 8 -s 1024 -l 16 -m 2 -r 480 360</code></p>
+<p>Maximum ray depth <span class="math inline">\(3\)</span>: <code>-t 8 -s 1024 -l 16 -m 3 -r 480 360</code></p>
+<p>Maximum ray depth <span class="math inline">\(100\)</span>: <code>-t 8 -s 1024 -l 16 -m 100 -r 480 360</code></p>
+<figure>
+<img src="CS 184 HW3.1 P4 img bunny depth 1.png" alt="Maximum ray depth 1" /><figcaption aria-hidden="true">Maximum ray depth <span class="math inline">\(1\)</span></figcaption>
+</figure>
+<figure>
+<img src="CS 184 HW3.1 P4 img bunny depth 2.png" alt="Maximum ray depth 2" /><figcaption aria-hidden="true">Maximum ray depth <span class="math inline">\(2\)</span></figcaption>
+</figure>
+<figure>
+<img src="CS 184 HW3.1 P4 img bunny depth 3.png" alt="Maximum ray depth 3" /><figcaption aria-hidden="true">Maximum ray depth <span class="math inline">\(3\)</span></figcaption>
+</figure>
+<figure>
+<img src="CS 184 HW3.1 P4 img bunny depth 100.png" alt="Maximum ray depth 100" /><figcaption aria-hidden="true">Maximum ray depth <span class="math inline">\(100\)</span></figcaption>
+</figure>
+<h2 class="unnumbered" id="quality-vs-pixel-sample-rate">Quality VS Pixel Sample Rate</h2>
+<p>The renderings of <code>sky/CBspheres_lambertian.dae</code> with global illumination using lighting sampling of various pixel sample rates are included as Fig.<a href="#fig:P4_sphere_depths" data-reference-type="ref" data-reference="fig:P4_sphere_depths">[fig:P4_sphere_depths]</a>. The lighting sample rate is <span class="math inline">\(4\)</span>.</p>
+<p>Following flags are used:</p>
+<p>Pixel sample rate <span class="math inline">\(1\)</span>: <code>-t 8 -s 1 -l 4 -m 5 -r 480 360</code></p>
+<p>Pixel sample rate <span class="math inline">\(2\)</span>: <code>-t 8 -s 2 -l 4 -m 5 -r 480 360</code></p>
+<p>Pixel sample rate <span class="math inline">\(4\)</span>: <code>-t 8 -s 4 -l 4 -m 5 -r 480 360</code></p>
+<p>Pixel sample rate <span class="math inline">\(8\)</span>: <code>-t 8 -s 8 -l 4 -m 5 -r 480 360</code></p>
+<p>Pixel sample rate <span class="math inline">\(16\)</span>: <code>-t 8 -s 16 -l 4 -m 5 -r 480 360</code></p>
+<p>Pixel sample rate <span class="math inline">\(64\)</span>: <code>-t 8 -s 64 -l 4 -m 5 -r 480 360</code></p>
+<p>Pixel sample rate <span class="math inline">\(1024\)</span>: <code>-t 8 -s 1024 -l 4 -m 5 -r 480 360</code></p>
+<figure>
+<img src="CS 184 HW3.1 P4 img sphere rate 1.png" alt="Pixel sample rate 1" /><figcaption aria-hidden="true">Pixel sample rate <span class="math inline">\(1\)</span></figcaption>
+</figure>
+<figure>
+<img src="CS 184 HW3.1 P4 img sphere rate 2.png" alt="Pixel sample rate 2" /><figcaption aria-hidden="true">Pixel sample rate <span class="math inline">\(2\)</span></figcaption>
+</figure>
+<figure>
+<img src="CS 184 HW3.1 P4 img sphere rate 4.png" alt="Pixel sample rate 4" /><figcaption aria-hidden="true">Pixel sample rate <span class="math inline">\(4\)</span></figcaption>
+</figure>
+<figure>
+<img src="CS 184 HW3.1 P4 img sphere rate 8.png" alt="Pixel sample rate 8" /><figcaption aria-hidden="true">Pixel sample rate <span class="math inline">\(8\)</span></figcaption>
+</figure>
+<figure>
+<img src="CS 184 HW3.1 P4 img sphere rate 16.png" alt="Pixel sample rate 16" /><figcaption aria-hidden="true">Pixel sample rate <span class="math inline">\(16\)</span></figcaption>
+</figure>
+<figure>
+<img src="CS 184 HW3.1 P4 img sphere rate 64.png" alt="Pixel sample rate 64" /><figcaption aria-hidden="true">Pixel sample rate <span class="math inline">\(64\)</span></figcaption>
+</figure>
+<figure>
+<img src="CS 184 HW3.1 P4 img sphere rate 1024.png" alt="Pixel sample rate 1024" /><figcaption aria-hidden="true">Pixel sample rate <span class="math inline">\(1024\)</span></figcaption>
+</figure>
+<h1 class="unnumbered" id="part-5-adaptive-sampling">Part 5: Adaptive Sampling</h1>
+<h2 class="unnumbered" id="task-1-adaptive-sampling">Task 1: Adaptive Sampling</h2>
+<p>In this part, a method of finding out whether the pixel sampling converges is implemented.</p>
+<p>Given a sequence of <span class="math inline">\(N\)</span> samples <span class="math inline">\(\{s_i|i\in\mathbb{N}_+(N)\}\)</span>, the empirical mean (that is, the expectation of the empirical mean estimator) is given by: <span class="math display">\[\mu = \frac{1}{N}\displaystyle\sum_{i=1}^Ns_i\]</span></p>
+<p>The empirical standard error (that is, the standard deviation of the empirical mean estimator) is given by: <span class="math display">\[\sigma = \sqrt{\frac{1}{N(N-1)}\displaystyle\sum_{i=1}^N(s_i-\mu)^2}\]</span></p>
+<p>Assuming normal distribution for the samples, suppose a confidence interval of <span class="math inline">\(i\%\)</span> is desired within a maximum relative tolerance of <span class="math inline">\(\delta\)</span>. Then <span class="math display">\[p\sigma \leq \delta |\mu|\]</span> where <span class="math inline">\(p\)</span> is the p-score of the confidence interval. If this is the case, then it is believed that the samples have already converged, so <span class="math inline">\(\mu\)</span> is adopted as the sample value.</p>
+<p>In the implementation <span class="math inline">\(i=95\)</span> and <span class="math inline">\(p\approx 1.96\)</span>.</p>
+<p>Therefore, an algorithm could be implemented as follows:</p>
+<p><span class="math inline">\(n\gets1\)</span> <span class="math inline">\(s_1\gets f(n)\)</span> <span class="math inline">\(s_2\gets s_1^2\)</span> <span> <span class="math inline">\(n\gets n+1\)</span> <span class="math inline">\(s_0\gets f(n)\)</span> <span class="math inline">\(s_1 \gets s_1 + s_0\)</span> <span class="math inline">\(s_2\gets s_2 + s_0^2\)</span> </span> <span class="math inline">\(s_1 = \frac{s_1}{n}\)</span></p>
+<h2 class="unnumbered" id="adaptive-sampling-image">Adaptive Sampling Image</h2>
+<p>The rendering of <code>sky/CBbunny.dae</code> with global illumination using adaptive lighting sampling is included as Fig.<a href="#fig:P5_bunny" data-reference-type="ref" data-reference="fig:P5_bunny">[fig:P5_bunny]</a>. The sample rate buffer is also included in Fig.<a href="#fig:P5_bunny" data-reference-type="ref" data-reference="fig:P5_bunny">[fig:P5_bunny]</a>. The maximum relative tolerance is <span class="math inline">\(0.05\)</span>.</p>
+<p>Following flags are used: <code>-t 8 -s 2048 -a 64 0.05 -l 1 -m 5 -r 480 360</code></p>
+<figure>
+<img src="CS 184 HW3.1 P5 img.png" alt="Rendered image" /><figcaption aria-hidden="true">Rendered image</figcaption>
+</figure>
+<figure>
+<img src="CS 184 HW3.1 P5 img rate.png" alt="Sample rate buffer" /><figcaption aria-hidden="true">Sample rate buffer</figcaption>
+</figure>
+<h1 class="unnumbered" id="collaboration">Collaboration</h1>
+<p>Wenhan Sun and Catherine Gai worked through all the project detail together. However, due to the large amount of pictures that needed to be rendered, picture rendering is done on multiple computers.</p>
+</body>
 </html>
