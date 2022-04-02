@@ -1,7 +1,374 @@
-<html>
-	<head>
-	</head>
-	<body>
-		Project 3-2 here
-	</body>
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="" xml:lang="">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <meta name="author" content="Catherine Gai, Wenhan Sun" />
+  <title>CS 184 HW3.2 Report </title>
+  <style>
+    html {
+      line-height: 1.7;
+      font-family: Georgia, serif;
+      font-size: 20px;
+      color: #1a1a1a;
+      background-color: #fdfdfd;
+    }
+    body {
+      margin: 0 auto;
+      max-width: 40em;
+      padding-left: 50px;
+      padding-right: 50px;
+      padding-top: 50px;
+      padding-bottom: 50px;
+      hyphens: auto;
+      word-wrap: break-word;
+      text-rendering: optimizeLegibility;
+      font-kerning: normal;
+    }
+    @media (max-width: 600px) {
+      body {
+        font-size: 0.9em;
+        padding: 1em;
+      }
+    }
+    @media print {
+      body {
+        background-color: transparent;
+        color: black;
+      }
+      p, h2, h3 {
+        orphans: 3;
+        widows: 3;
+      }
+      h2, h3, h4 {
+        page-break-after: avoid;
+      }
+    }
+    p {
+      margin-top: 1.7em;
+    }
+    a {
+      color: #1a1a1a;
+    }
+    a:visited {
+      color: #1a1a1a;
+    }
+    img {
+      max-width: 100%;
+    }
+    h1, h2, h3, h4, h5, h6 {
+      margin-top: 1.7em;
+    }
+    ol, ul {
+      padding-left: 1.7em;
+      margin-top: 1.7em;
+    }
+    li > ol, li > ul {
+      margin-top: 0;
+    }
+    blockquote {
+      margin: 1.7em 0 1.7em 1.7em;
+      padding-left: 1em;
+      border-left: 2px solid #e6e6e6;
+      font-style: italic;
+    }
+    code {
+      font-family: Menlo, Monaco, 'Lucida Console', Consolas, monospace;
+      background-color: #f0f0f0;
+      font-size: 85%;
+      margin: 0;
+      padding: .2em .4em;
+    }
+    pre {
+      line-height: 1.5em;
+      padding: 1em;
+      background-color: #f0f0f0;
+      overflow: auto;
+    }
+    pre code {
+      padding: 0;
+      overflow: visible;
+    }
+    hr {
+      background-color: #1a1a1a;
+      border: none;
+      height: 1px;
+      margin-top: 1.7em;
+    }
+    table {
+      border-collapse: collapse;
+      width: 100%;
+      overflow-x: auto;
+      display: block;
+    }
+    th, td {
+      border-bottom: 1px solid lightgray;
+      padding: 1em 3em 1em 0;
+    }
+    header {
+      margin-bottom: 6em;
+      text-align: center;
+    }
+    nav a:not(:hover) {
+      text-decoration: none;
+    }
+    code{white-space: pre-wrap;}
+    span.smallcaps{font-variant: small-caps;}
+    span.underline{text-decoration: underline;}
+    div.column{display: inline-block; vertical-align: top; width: 50%;}
+    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+    ul.task-list{list-style: none;}
+  </style>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
+  <!--[if lt IE 9]>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/html5shiv/3.7.3/html5shiv-printshiv.min.js"></script>
+  <![endif]-->
+</head>
+<body>
+<header id="title-block-header">
+<h1 class="title"><span><strong>CS 184 HW3.2 Report</strong></span><br /></h1>
+<p class="author">Catherine Gai, Wenhan Sun</p>
+<p class="date">2022 Spring</p>
+</header>
+<h1 class="unnumbered" id="webpage-link">Webpage Link</h1>
+<h2> Refer to Gradescope for actual compilation of LaTeX-typed report</h2>
+<p><a href="https://github.com/cal-cs184-student/sp22-project-webpages-Wenhan0112/blob/master/proj3-2/index.html">https://github.com/cal-cs184-student/sp22-project-webpages-Wenhan0112/blob/master/proj3-2/index.html</a></p>
+<h1 class="unnumbered" id="introduction">Introduction</h1>
+<p>In this homework, the bidirectional scattering distribution function are implemented for some of the materials:</p>
+<ul>
+<li><p>Mirror (Part 1): material where only specular reflection occurs.</p></li>
+<li><p>Pure refraction (Part 1): material where only reflection occurs.</p></li>
+<li><p>Glass (Part 1): dielectric material where refraction and reflection occur.</p></li>
+<li><p>Metal (Part 2): microfacet conductive materials where only reflection occurs.</p></li>
+</ul>
+<p><strong>NOTE: Part 1 and Part 2 are chosen!</strong></p>
+<h1 class="unnumbered" id="part-1-mirror-and-glass-materials">Part 1: Mirror and Glass Materials</h1>
+<h2 class="unnumbered" id="task-1-reflect">Task 1: Reflect</h2>
+<p>Given an incoming direction <span class="math inline">\(\mathbf{e}_i\in\partial B(\mathbf{0},1)\subseteq\mathbb{R}^3\)</span> and a normal direction of the surface <span class="math inline">\(\mathbf{n}\in\partial B(\mathbf{0},1)\)</span>, the outgoing direction of the light <span class="math inline">\(\mathbf{e}_r\in\partial B(\mathbf{0},1)\)</span> is given by: <span class="math display">\[\mathbf{e}_r = -\mathbf{e}_i + 2(\mathbf{e}_i\cdot\mathbf{n})\mathbf{n}\]</span></p>
+<p>Moreover, Suppose <span class="math inline">\((\hat{\mathbf{x}}, \hat{\mathbf{y}}, \hat{\mathbf{z}})\)</span> is a positively oriented orthonormal basis of <span class="math inline">\(\mathbb{R}^3\)</span> where <span class="math inline">\(\mathbf{n}=\hat{\mathbf{z}}\)</span>. Suppose <span class="math display">\[\mathbf{e}_i = e_{i,x}\hat{\mathbf{x}} + e_{i,y}\hat{\mathbf{y}} + e_{i,z}\hat{\mathbf{z}}\]</span></p>
+<p>Then <span class="math display">\[\begin{aligned}
+    \mathbf{e}_r &amp;= -\mathbf{e}_i + 2(\mathbf{e}_i\cdot\mathbf{n})\mathbf{n} = -(e_{i,x}\hat{\mathbf{x}} + e_{i,y}\hat{\mathbf{y}} + e_{i,z}\hat{\mathbf{z}}) + 2((e_{i,x}\hat{\mathbf{x}} + e_{i,y}\hat{\mathbf{y}} + e_{i,z}\hat{\mathbf{z}})\cdot\hat{\mathbf{z}})\hat{\mathbf{z}} \\
+    &amp;= -e_{i,x}\hat{\mathbf{x}} - e_{i,y}\hat{\mathbf{y}} + e_{i,z}\hat{\mathbf{z}}\end{aligned}\]</span></p>
+<p>Suppose <span class="math display">\[\mathbf{e}_r = e_{r,x}\hat{\mathbf{x}} + e_{r,y}\hat{\mathbf{y}} + e_{r,z}\hat{\mathbf{z}}\]</span></p>
+<p>Then by reversibility of light path, <span class="math display">\[\begin{aligned}
+    \mathbf{e}_i &amp;= -\mathbf{e}_r + 2(\mathbf{e}_r\cdot\mathbf{n})\mathbf{n}\\
+    &amp;= e_{r,x}\hat{\mathbf{x}} + e_{r,y}\hat{\mathbf{y}} + e_{r,z}\hat{\mathbf{z}} \end{aligned}\]</span></p>
+<h2 class="unnumbered" id="task-2-mirror-material">Task 2: Mirror Material</h2>
+<p>The bidirectional scattering distribution function of a mirror material is given by: <span class="math display">\[(\mathbf{e}_i,\mathbf{e}_r) \mapsto \frac{R}{\mathbf{e}_i\cdot\mathbf{n}}\delta(\mathbf{e}_r, -\mathbf{e}_i + 2(\mathbf{e}_i\cdot\mathbf{n})\mathbf{n})\]</span> where <span class="math inline">\(R\)</span> is the reflectance, <span class="math inline">\(\delta\)</span> is the Dirac delta function defined in <span class="math inline">\(\partial B(\mathbf{0},1)\)</span>. This delta function is given upon the fact that incident light from <span class="math inline">\(\mathbf{e}_i\)</span> must be reflect to <span class="math inline">\(\mathbf{e}_r = -\mathbf{e}_i+2(\mathbf{e}_i\cdot\mathbf{n})\mathbf{n}\)</span> direction.</p>
+<p>In the implementation, when the incoming direction is sampled, importance sampling is done with probability <span class="math inline">\(1\)</span> that the sampled incident direction corresponds to the specular reflection direction of the output direction. This yields a delta function in the probability density function. However, in the implementation, it is checked if the bounce is specular beforehand. Therefore, the delta function is reduced to <span class="math inline">\(1\)</span> in the implementation. Moreover, the implementation bidirectional scattering distribution function is implemented to be <span class="math inline">\(0\)</span> because the set where it takes nonzero value is of measure <span class="math inline">\(0\)</span>.</p>
+<h2 class="unnumbered" id="task-3-refraction">Task 3: Refraction</h2>
+<p>Given an incoming direction <span class="math inline">\(\mathbf{e}_i\in\partial B(\mathbf{0},1)\subseteq\mathbb{R}^3\)</span>, a normal direction of the surface <span class="math inline">\(\mathbf{n}\in\partial B(\mathbf{0},1)\)</span>, a relative index of refraction of the outgoing to the incoming material <span class="math inline">\(n_r\)</span>, suppose the refracted direction is <span class="math inline">\(\mathbf{e}_r\in\partial B(\mathbf{0}, 1)\)</span>. Suppose <span class="math display">\[\begin{dcases}
+\mathbf{e}_r = \mathbf{e}_{r,||} + (\mathbf{e}_{r}\cdot\mathbf{n})\mathbf{n} \\
+\mathbf{e}_i = \mathbf{e}_{i,||} + (\mathbf{e}_{i}\cdot\mathbf{n})\mathbf{n} \\
+\end{dcases}\]</span> where <span class="math inline">\(\mathbf{e}_{r,||}, \mathbf{e}_{i,||}\in\mathrm{span}(\mathbf{n})^{\perp}\)</span></p>
+<p>Then, by boundary condition of electromagnetic field in a dielectric material (invariance of phase on the boundary, detail in Physics 5B/110A), if refraction occurs, <span class="math display">\[n_r\mathbf{e}_{r,||} = -\mathbf{e}_{i,||}\]</span></p>
+<p>However, if <span class="math display">\[\left|-\frac{1}{n_r}\mathbf{e}_{i,||}\right| = \frac{|\mathbf{e}_{i,||}|}{n_r} = \frac{1}{n_r}\sqrt{1 - (\mathbf{e}_i\cdot\mathbf{n})^2} &gt; 1\]</span> then there does not exists <span class="math inline">\(\mathbf{e}_r\in\partial B(\mathbf{0},1)\)</span> that satisfies the condition. Therefore, in this case, no refraction occurs. This phenomenon is defined as total internal reflection.</p>
+<p>If refraction occurs, then <span class="math display">\[|\mathbf{e}_r\cdot\mathbf{n}| = \sqrt{1 - |\mathbf{e}_{r,||}|^2} = \sqrt{1 - \frac{1}{n_r^2}\left(1 - (\mathbf{e}_i\cdot\mathbf{n})^2\right)}\]</span></p>
+<p>Because refraction occurs in two sides of the surface, <span class="math inline">\(\mathbf{e}_r\cdot\mathbf{n}\)</span> should has a different sign of <span class="math inline">\(\mathbf{e}_i\cdot\mathbf{n}\)</span>. Therefore, <span class="math display">\[\mathbf{e}_r\cdot\mathbf{n} = -\sqrt{1 - \frac{1}{n_r^2}\left(1 - (\mathbf{e}_i\cdot\mathbf{n})^2\right)}\mathrm{sgn}(\mathbf{e}_i\cdot\mathbf{n})\]</span></p>
+<p>Therefore, <span class="math display">\[\mathbf{e}_r = -\frac{\mathbf{e}_{i,||}}{n_r} - \sqrt{1 - \frac{1}{n_r^2}\left(1 - (\mathbf{e}_i\cdot\mathbf{n})^2\right)}\mathrm{sgn}(\mathbf{e}_i\cdot\mathbf{n}) \mathbf{n}\]</span> <span class="math display">\[\mathbf{e}_r = -\frac{\mathbf{e}_{i} - (\mathbf{e}_i\cdot\mathbf{n})\mathbf{n}}{n_r} - \sqrt{1 - \frac{1}{n_r^2}\left(1 - (\mathbf{e}_i\cdot\mathbf{n})^2\right)}\mathrm{sgn}(\mathbf{e}_i\cdot\mathbf{n}) \mathbf{n}\]</span> Moreover, Suppose <span class="math inline">\((\hat{\mathbf{x}}, \hat{\mathbf{y}}, \hat{\mathbf{z}})\)</span> is a positively oriented orthonormal basis of <span class="math inline">\(\mathbb{R}^3\)</span> where <span class="math inline">\(\mathbf{n}=\hat{\mathbf{z}}\)</span>. Suppose <span class="math display">\[\mathbf{e}_i = e_{i,x}\hat{\mathbf{x}} + e_{i,y}\hat{\mathbf{y}} + e_{i,z}\hat{\mathbf{z}}\]</span></p>
+<p>Then refraction occurs iff <span class="math inline">\(\frac{1}{n_r}\sqrt{1 - e_{i,z}^2} \leq 1\)</span>, where the refracted direction is <span class="math display">\[\mathbf{e}_r = -\frac{e_{i,x}}{n_r}\hat{\mathbf{x}} - \frac{e_{i,y}}{n_r}\hat{\mathbf{y}} - \sqrt{1 - \frac{1}{n_r^2}(1-e_{i,z})^2)}\mathrm{sgn(e_{i,z})}\hat{\mathbf{z}}\]</span></p>
+<p>Suppose <span class="math display">\[\mathbf{e}_r = e_{r,x}\hat{\mathbf{x}} + e_{r,y}\hat{\mathbf{y}} + e_{r,z}\hat{\mathbf{z}}\]</span></p>
+<p>Then by reversibility of light path, refraction occurs iff <span class="math display">\[n_r\sqrt{1-(\mathbf{e}_r\cdot\mathbf{n})^2} = n_r\sqrt{1 - e_{r,z}^2} \leq 1\]</span> where the incident direction is <span class="math display">\[\begin{aligned}
+\mathbf{e}_i &amp;= -n_r\left(\mathbf{e}_{i} - (\mathbf{e}_i\cdot\mathbf{n})\mathbf{n}\right) - \sqrt{1 - n_r^2\left(1 - (\mathbf{e}_i\cdot\mathbf{n})^2\right)}\mathrm{sgn}(\mathbf{e}_i\cdot\mathbf{n}) \mathbf{n}\\
+&amp;= -n_re_{r,x}\hat{\mathbf{x}} - n_re_{r,y}\hat{\mathbf{y}} - \sqrt{1 -n_r^2(1-e_{r,z})^2)}\mathrm{sgn(e_{r,z})}\hat{\mathbf{z}}\end{aligned}\]</span></p>
+<h2 class="unnumbered" id="task-4-glass-material">Task 4: Glass Material</h2>
+<p>The bidirectional scattering distribution function of a glass material with normal <span class="math inline">\(\mathbf{n}\in\partial B(\mathbf{0},1)\)</span> is given by: <span class="math display">\[(\mathbf{e}_i,\mathbf{e}_r) \mapsto \begin{dcases}
+\frac{R}{\mathbf{e}_i\cdot\mathbf{n}}\delta(\mathbf{e}_r - d_r(\mathbf{e}_i, \mathbf{n})) &amp;, \mathbf{e}_i \notin D_t \\
+\frac{r(d^{-1}_r(\mathbf{e}_r))^2R}{\mathbf{e}_i\cdot\mathbf{n}}\delta(\mathbf{e}_r - d_r(\mathbf{e}_i)) + \frac{(1-r(d^{-1}_r(\mathbf{e}_r))^2)T}{n_r(\mathbf{e}_i)^2(\mathbf{e}_i\cdot\mathbf{n})}\delta(\mathbf{e}_r - d_t(\mathbf{e}_i)) &amp;, \mathbf{e}_i\in D_t
+\end{dcases}\]</span> where:</p>
+<ul>
+<li><p><span class="math inline">\(D_t = \left\{\mathbf{e}_i\in\partial B(\mathbf{0},1)\middle|\frac{1}{n_r(\mathbf{e}_i)}\sqrt{1 - (\mathbf{e}_i\cdot\mathbf{n})^2} &gt; 1\right\}\)</span>, that is, the set of incident directions where refraction occurs.</p></li>
+<li><p><span class="math inline">\(R\)</span>: The reflectance of the material</p></li>
+<li><p><span class="math inline">\(T\)</span>: The transmittance of the material.</p></li>
+<li><p><span class="math inline">\(r\)</span>: The amplitude reflection coefficient of the material as a function of incident direction.</p></li>
+<li><p><span class="math inline">\(d_r\)</span>: The reflection direction as a function of incident direction. Note that this function is invertible, and <span class="math inline">\(d^{-1}_r=d_r\)</span> by reversibility of light path.</p></li>
+<li><p><span class="math inline">\(d_t\)</span>: The refraction direction as a function of incident direction defined in <span class="math inline">\(D_t\)</span>. Note that this function is invertible constrained on its range, and <span class="math inline">\(d^{-1}_t=d_t\)</span> by reversibility of light path.</p></li>
+<li><p><span class="math inline">\(n_r\)</span>: The relative index of refraction of the outgoing material to the incident material as a function of the incident direction.</p></li>
+<li><p><span class="math inline">\(\delta\)</span>: The Dirac delta function defined in <span class="math inline">\(\partial B(\mathbf{0},1)\)</span></p></li>
+</ul>
+<p><span class="math inline">\(r\)</span> is given by the Fresnel equation, weighted by polarization. However, the Schlick approximation is used: <span class="math inline">\(\forall \mathbf{e}_i\in D_t\)</span>: <span class="math display">\[r(\mathbf{e}_i)^2 = \left(\frac{n_1-n_2}{n_1+n_2}\right)^2 + \frac{4n_1n_2}{(n_1+n_2)^2}(1-(\mathbf{e}_i\cdot\mathbf{n})^5)\]</span>. where <span class="math inline">\(n_1, n_2\)</span> are the index of refraction of the two materials. Note that <span class="math inline">\(r\)</span> is symmetric under exchange of materials. Note that <span class="math inline">\(\forall \mathbf{e}_r\in\partial B(\mathbf{0},1)\)</span>, <span class="math inline">\(\mathbf{e}_r\cdot\mathbf{n} = d^{-1}_r(\mathbf{e}_r)\cdot\mathbf{n}\)</span>, so <span class="math inline">\(r(\mathbf{e}_r)^2 = r(d^{-1}_r(\mathbf{e}_r))^2\)</span>.</p>
+<p>To sample the incoming direction from the outgoing direction <span class="math inline">\(\mathbf{e}_r\)</span>, there are two occasions to consider:</p>
+<ul>
+<li><p>Refraction does not occur: The only incoming direction is coming from the reflection. Therefore, the only direction that can be sampled is <span class="math inline">\(d^{-1}_r(\mathbf{e}_r)\)</span>.</p></li>
+<li><p>Refraction occurs: The two incoming direction are due to reflection and refraction. To do importance sampling, they are weighted approximately by their intensity. That is, the probability of sampling on the specular direction <span class="math inline">\(d^{-1}_r(\mathbf{e}_r)\)</span> is <span class="math inline">\(r(d^{-1}_r(\mathbf{e}_r))^2 = r(\mathbf{e}_r)^2\)</span>, and the probability of sampling on the specular direction <span class="math inline">\(d^{-1}_t(\mathbf{e}_r)\)</span> is <span class="math inline">\(1-r(d^{-1}_r(\mathbf{e}_r))^2=1- r(\mathbf{e}_r)^2\)</span>.</p></li>
+</ul>
+<h2 class="unnumbered" id="max-ray-depth-comparison">Max Ray Depth Comparison</h2>
+<p>The renderings of <code>sky/CBspheres.dae</code> of various maximum ray depths are included as Fig.<a href="#fig:P1_spheres_depths" data-reference-type="ref" data-reference="fig:P1_spheres_depths">[fig:P1_spheres_depths]</a>.</p>
+<p>Following flags are used:</p>
+<p>Maximum ray depth <span class="math inline">\(0\)</span>: <code>-t 8 -s 64 -l 4 -m 0 -r 480 360</code></p>
+<p>Maximum ray depth <span class="math inline">\(1\)</span>: <code>-t 8 -s 64 -l 4 -m 1 -r 480 360</code></p>
+<p>Maximum ray depth <span class="math inline">\(2\)</span>: <code>-t 8 -s 64 -l 4 -m 2 -r 480 360</code></p>
+<p>Maximum ray depth <span class="math inline">\(3\)</span>: <code>-t 8 -s 64 -l 4 -m 3 -r 480 360</code></p>
+<p>Maximum ray depth <span class="math inline">\(4\)</span>: <code>-t 8 -s 64 -l 4 -m 4 -r 480 360</code></p>
+<p>Maximum ray depth <span class="math inline">\(5\)</span>: <code>-t 8 -s 64 -l 4 -m 5 -r 480 360</code></p>
+<p>Maximum ray depth <span class="math inline">\(100\)</span>: <code>-t 8 -s 64 -l 4 -m 100 -r 480 360</code></p>
+<figure>
+<img src="CS 184 HW3.2 P1 Img Spheres 0.png" alt="Maximum ray depth 0" /><figcaption aria-hidden="true">Maximum ray depth <span class="math inline">\(0\)</span></figcaption>
+</figure>
+<figure>
+<img src="CS 184 HW3.2 P1 Img Spheres 1.png" alt="Maximum ray depth 1" /><figcaption aria-hidden="true">Maximum ray depth <span class="math inline">\(1\)</span></figcaption>
+</figure>
+<figure>
+<img src="CS 184 HW3.2 P1 Img Spheres 2.png" alt="Maximum ray depth 2" /><figcaption aria-hidden="true">Maximum ray depth <span class="math inline">\(2\)</span></figcaption>
+</figure>
+<figure>
+<img src="CS 184 HW3.2 P1 Img Spheres 3.png" alt="Maximum ray depth 3" /><figcaption aria-hidden="true">Maximum ray depth <span class="math inline">\(3\)</span></figcaption>
+</figure>
+<figure>
+<img src="CS 184 HW3.2 P1 Img Spheres 4.png" alt="Maximum ray depth 4" /><figcaption aria-hidden="true">Maximum ray depth <span class="math inline">\(4\)</span></figcaption>
+</figure>
+<figure>
+<img src="CS 184 HW3.2 P1 Img Spheres 5.png" alt="Maximum ray depth 5" /><figcaption aria-hidden="true">Maximum ray depth <span class="math inline">\(5\)</span></figcaption>
+</figure>
+<figure>
+<img src="CS 184 HW3.2 P1 Img Spheres 100.png" alt="Maximum ray depth 100" /><figcaption aria-hidden="true">Maximum ray depth <span class="math inline">\(100\)</span></figcaption>
+</figure>
+<p>Differences between consecutive maximum ray depths and their explanations:</p>
+<ul>
+<li><p>None<span class="math inline">\(\to 0\)</span>: Only the area light is rendered.</p></li>
+<li><p><span class="math inline">\(0\to 1\)</span>:</p>
+<ul>
+<li><p>Increase in overall lighting intensity.</p></li>
+<li><p>The floor and walls are rendered. The light path is:</p>
+<p>Light source <span class="math inline">\(\to\)</span> Walls/floor <span class="math inline">\(\to\)</span> Observer.</p></li>
+<li><p>The specular reflection of the light source on the mirror and glass ball are rendered. The light path is:</p>
+<p>Light source <span class="math inline">\(\to\)</span> Mirror ball <span class="math inline">\(\to\)</span> Observer.</p></li>
+</ul></li>
+<li><p><span class="math inline">\(1\to 2\)</span>:</p>
+<ul>
+<li><p>Increase in overall lighting intensity.</p></li>
+<li><p>The ceiling is rendered. The light path is:</p>
+<p>Light source <span class="math inline">\(\to\)</span> Walls/floor <span class="math inline">\(\to\)</span> Ceiling <span class="math inline">\(\to\)</span> Observer.</p></li>
+<li><p>The reflection of the floor and walls on the mirror ball are rendered. The light path is:</p>
+<p>Light source <span class="math inline">\(\to\)</span> Walls/floor <span class="math inline">\(\to\)</span> Mirror ball <span class="math inline">\(\to\)</span> Observer.</p></li>
+<li><p>The specular reflection from the light source on the glass ball and then the mirror ball is rendered. The light path is:</p>
+<p>Light source <span class="math inline">\(\to\)</span> Outer reflect glass ball <span class="math inline">\(\to\)</span> Mirror ball <span class="math inline">\(\to\)</span> Observer.</p></li>
+<li><p>The faint reflection of the floor and walls on the glass ball is rendered. The light path is:</p>
+<p>Light source <span class="math inline">\(\to\)</span> Walls/floor <span class="math inline">\(\to\)</span> Outer reflect glass ball <span class="math inline">\(\to\)</span> Observer.</p></li>
+<li><p>The faint white spot on the left of the glass ball. It is the reflection of reflected light source on the mirror ball. The light path is:</p>
+<p>Light source <span class="math inline">\(\to\)</span> Mirror ball <span class="math inline">\(\to\)</span> Outer reflect glass ball <span class="math inline">\(\to\)</span> Observer.</p></li>
+</ul></li>
+<li><p><span class="math inline">\(2\to 3\)</span>:</p>
+<ul>
+<li><p>Increase in overall lighting intensity.</p></li>
+<li><p>The reflection of the ceiling on the mirror ball is rendered. The light path is:</p>
+<p>Light source <span class="math inline">\(\to\)</span> Walls/floor <span class="math inline">\(\to\)</span> Ceiling <span class="math inline">\(\to\)</span> Mirror ball <span class="math inline">\(\to\)</span> Observer.</p></li>
+<li><p>The refraction of the floor and walls through the glass ball is rendered. The light path is:</p>
+<p>Light source <span class="math inline">\(\to\)</span> Walls/floor <span class="math inline">\(\to\)</span> Enter glass ball <span class="math inline">\(\to\)</span> Exit glass ball <span class="math inline">\(\to\)</span> Observer.</p></li>
+<li><p>The big white spot beneath the glass ball on the floor is rendered. The light path is:</p>
+<p>Light source <span class="math inline">\(\to\)</span> Enter glass ball <span class="math inline">\(\to\)</span> Exit glass ball <span class="math inline">\(\to\)</span> Floor <span class="math inline">\(\to\)</span> Observer.</p></li>
+<li><p>The faint reflection of the floor and walls on the glass ball is gone. The refraction intensity is much larger than the reflection intensity on the glass ball.</p></li>
+</ul></li>
+<li><p><span class="math inline">\(3\to 4\)</span>:</p>
+<ul>
+<li><p>Increase in overall lighting intensity.</p></li>
+<li><p>The reflection on the mirror ball of the refracted floor and walls through the glass ball. The light path is:</p>
+<p>Light source <span class="math inline">\(\to\)</span> Walls/floor <span class="math inline">\(\to\)</span> Enter glass ball <span class="math inline">\(\to\)</span> Exit glass ball <span class="math inline">\(\to\)</span> Mirror ball <span class="math inline">\(\to\)</span> Observer.</p></li>
+<li><p>The reflection on the mirror ball of the big white spot beneath the glass ball. The light path is:</p>
+<p>Light source <span class="math inline">\(\to\)</span> Enter glass ball <span class="math inline">\(\to\)</span> Exit glass ball <span class="math inline">\(\to\)</span> Floor <span class="math inline">\(\to\)</span> Mirror ball <span class="math inline">\(\to\)</span> Observer.</p></li>
+<li><p>The light spot at the bottom of the blue wall. The light path is:</p>
+<p>Light source <span class="math inline">\(\to\)</span> Mirror ball <span class="math inline">\(\to\)</span> Enter glass ball <span class="math inline">\(\to\)</span> Exit glass ball <span class="math inline">\(\to\)</span> Blue wall <span class="math inline">\(\to\)</span> Observer.</p></li>
+<li><p>The faint white spot on the bottom the glass ball. It is the glass reflection of the big white spot beneath the glass ball. The light path is:</p>
+<p>Light source <span class="math inline">\(\to\)</span> Enter glass ball <span class="math inline">\(\to\)</span> Exit glass ball <span class="math inline">\(\to\)</span> Floor <span class="math inline">\(\to\)</span> Outer reflect glass ball <span class="math inline">\(\to\)</span> Observer.</p></li>
+</ul></li>
+<li><p><span class="math inline">\(4\to 5\)</span>:</p>
+<ul>
+<li><p>Increase in overall lighting intensity.</p></li>
+<li><p>No other significant feature observed.</p></li>
+</ul></li>
+<li><p><span class="math inline">\(5\to 100\)</span>:</p>
+<ul>
+<li><p>Increase in overall lighting intensity.</p></li>
+<li><p>Glazing on the top of the glass ball. It is the outer reflection on the top of the glass ball, where the incident angle is almost <span class="math inline">\(\frac{\pi}{2}\)</span> and the reflection coefficient is almost <span class="math inline">\(1\)</span>.</p></li>
+</ul></li>
+</ul>
+<h1 class="unnumbered" id="part-2-microfacet-material">Part 2: Microfacet Material</h1>
+<h2 class="unnumbered" id="task-1-microfacet-bidirectional-scattering-distribution-function">Task 1: Microfacet Bidirectional Scattering distribution Function</h2>
+<p>The microfacet bidirectional scattering distribution function of a conduction material with macro surface normal direction <span class="math inline">\(\mathbf{n}\in\partial B(\mathbf{0,1})\)</span> is given by: <span class="math display">\[(\mathbf{e}_i,\mathbf{e}_r) \mapsto \frac{F(\mathbf{e}_i)G(\mathbf{e}_i,\mathbf{e}_r)D\left(\frac{\mathbf{e}_i+\mathbf{e}_r}{\|\mathbf{e}_i+\mathbf{e}_r\|}\right)}{4(\mathbf{e}_i\cdot\mathbf{n})(\mathbf{e}_r\cdot\mathbf{n})}\]</span> where</p>
+<ul>
+<li><p><span class="math inline">\(F\)</span>: the intensity reflection coefficient of the conducting material as a function of incident direction.</p></li>
+<li><p><span class="math inline">\(G\)</span>: the shadow-masking function of the surface.</p></li>
+<li><p><span class="math inline">\(D\)</span>: the normal distribution probability density function of the surface.</p></li>
+</ul>
+<h2 class="unnumbered" id="task-2-normal-distribution-function">Task 2: Normal Distribution Function</h2>
+<p>The normal distribution probability density function is assumed to be the Beckmann distribution: given the macro surface normal direction <span class="math inline">\(\mathbf{n}\in\partial B(\mathbf{0,1})\)</span>, <span class="math display">\[\mathbf{h}\mapsto \frac{\mathrm{e}^{-\frac{(\mathbf{h}\cdot\mathbf{n})^{-2}-1}{\alpha^2}}}{\pi\alpha^2(\mathbf{h}\cdot\mathbf{n})^4}\]</span> where <span class="math inline">\(\alpha\in\mathbb{R}_+\)</span> represents the roughness of the surface. <span class="math inline">\(\alpha\)</span> is positively related with the roughness of the surface.</p>
+<h2 class="unnumbered" id="task-3-fresnel-term">Task 3: Fresnel Term</h2>
+<p>It is assumed that the incoming light is natural light, with equal <span class="math inline">\(p\)</span> and <span class="math inline">\(s\)</span> polarization intensity. Then the overall intensity reflection coefficient is the average of the two.</p>
+<p>Given an incident direction <span class="math inline">\(\mathbf{e}_i\)</span>, a macro surface normal direction <span class="math inline">\(\mathbf{n}\)</span>, and a complex index of refraction <span class="math inline">\(n\)</span>, the <span class="math inline">\(s\)</span>-polarization intensity reflection coefficient is given by: <span class="math display">\[\frac{|n|^2 - 2\mathrm{Re}(n)(\mathbf{e}_i\cdot\mathbf{n}) + (\mathbf{e}_i\cdot\mathbf{n})^2}{|n|^2 + 2\mathrm{Re}(n)(\mathbf{e}_i\cdot\mathbf{n}) + (\mathbf{e}_i\cdot\mathbf{n})^2}\]</span> while the <span class="math inline">\(p\)</span>-polarization intensity reflection coefficient is given by: <span class="math display">\[\frac{|n|^2(\mathbf{e}_i\cdot\mathbf{n})^2 - 2\mathrm{Re}(n)(\mathbf{e}_i\cdot\mathbf{n}) + 1}{|n|^2(\mathbf{e}_i\cdot\mathbf{n})^2 + 2\mathrm{Re}(n)(\mathbf{e}_i\cdot\mathbf{n}) + 1}\]</span></p>
+<p>Therefore, the overall intensity reflection coefficient evaluated at incident direction <span class="math inline">\(\mathbf{e}_i\)</span> is: <span class="math display">\[F(\mathbf{e}_i) = \frac{1}{2}\left(\frac{|n|^2 - 2\mathrm{Re}(n)(\mathbf{e}_i\cdot\mathbf{n}) + (\mathbf{e}_i\cdot\mathbf{n})^2}{|n|^2 + 2\mathrm{Re}(n)(\mathbf{e}_i\cdot\mathbf{n}) + (\mathbf{e}_i\cdot\mathbf{n})^2} + \frac{|n|^2(\mathbf{e}_i\cdot\mathbf{n})^2 - 2\mathrm{Re}(n)(\mathbf{e}_i\cdot\mathbf{n}) + 1}{|n|^2(\mathbf{e}_i\cdot\mathbf{n})^2 + 2\mathrm{Re}(n)(\mathbf{e}_i\cdot\mathbf{n}) + 1}\right)\]</span></p>
+<p>Note that the light is not monochromatic, so the intensity of each wavelength/color is given by their different intensity reflection coefficient due to the difference of the corresponding index of refraction.</p>
+<h2 class="unnumbered" id="task-4-importance-sampling">Task 4: Importance Sampling</h2>
+<p>Given a microfacet material surface with macro surface normal <span class="math inline">\(\mathbf{n}\in\partial B(\mathbf{0},1)\)</span> and outgoing direction <span class="math inline">\(\mathbf{e}_r\in\partial B(\mathbf{0},1)\)</span>, the incident direction is wanted to be sampled. Suppose the incident direction <span class="math inline">\(\mathbf{e}_i\)</span> is a random variable in <span class="math inline">\(\partial B(\mathbf{0},1)\)</span> such that <span class="math inline">\(\mathbf{h}=\frac{\mathbf{e}_r+\mathbf{e}_i}{\|\mathbf{e}_r+\mathbf{e}_i\|}\)</span> satisfies the Beckmann distribution of roughness <span class="math inline">\(\alpha\)</span>. Then <span class="math inline">\(\mathbf{e}_i = -\mathbf{e}_r + 2(\mathbf{e}_r\cdot\mathbf{h})\mathbf{h}\)</span>. Therefore, suppose <span class="math inline">\(\mathbf{h}_0\)</span> is sampled from the Beckmann distribution with probability density function <span class="math inline">\(D\)</span>. Then the sampled incoming direction is <span class="math inline">\(-\mathbf{e}_r + 2(\mathbf{e}_r\cdot\mathbf{h}_0)\mathbf{h}_0\)</span>. The probability density function of the random variable <span class="math inline">\(\mathbf{e}_i\)</span> evaluated at that point is given by: <span class="math display">\[D(\mathbf{h}_0)\mathrm{det}(\partial(\mathbf{h}\mapsto -\mathbf{e}_r + 2(\mathbf{e}_r\cdot\mathbf{h})\mathbf{h})(\mathbf{h}_0)) = \frac{D(\mathbf{h}_0)}{4(\mathbf{e}_r\cdot\mathbf{h}_0)}\]</span></p>
+<p>Therefore, in summary, the incident direction is sampled from a distribution of probability density function: <span class="math display">\[\mathbf{e}_i\mapsto \frac{D\left(\frac{\mathbf{e}_r+\mathbf{e}_i}{\|\mathbf{e}_r+\mathbf{e}_i\|}\right)}{4\left(\mathbf{e}_r\cdot \frac{\mathbf{e}_r+\mathbf{e}_i}{\|\mathbf{e}_r+\mathbf{e}_i\|}\right)} = \frac{D\left(\frac{\mathbf{e}_r+\mathbf{e}_i}{\|\mathbf{e}_r+\mathbf{e}_i\|}\right)}{2\|\mathbf{e}_r+\mathbf{e}_i\|}\]</span></p>
+<p>To sample the random variable <span class="math inline">\(\mathbf{h}\)</span> that satisfies the Beckmann distribution, the following inversion method could be used: suppose <span class="math inline">\(u_1,u_2\)</span> are independent standard uniform random variables. Suppose <span class="math inline">\((\hat{\mathbf{x}},\hat{\mathbf{y}},\mathbf{n})\)</span> is a positively oriented orthonormal basis in <span class="math inline">\(\mathbb{R}^3\)</span>, then the following random variable follows the Beckmann distribution of roughness <span class="math inline">\(\alpha\)</span> around <span class="math inline">\(\mathbf{n}\)</span>: <span class="math display">\[\cos(\phi)\sin(\theta)\hat{\mathbf{x}} + \sin(\phi)\sin(\theta)\hat{\mathbf{y}} + \cos(\theta)\mathbf{n}\]</span> where <span class="math display">\[\theta = \arctan(\sqrt{-\alpha^2\ln(1-u_1)})\]</span> <span class="math display">\[\phi = 2\pi u_2\]</span></p>
+<h2 class="unnumbered" id="roughness-comparison">Roughness Comparison</h2>
+<p>The renderings of <code>sky/CBdragon_microfacet_au.dae</code> of various roughness are included as Fig.<a href="#fig:P2_dragon_au" data-reference-type="ref" data-reference="fig:P2_dragon_au">[fig:P2_dragon_au]</a>.</p>
+<p>Following flags are used:</p>
+<p><code>-t 8 -s 128 -l 1 -m 5 -r 480 360</code></p>
+<figure>
+<img src="CS 184 HW3.2 P2 Img Dragon 0.005.png" alt="Roughness 0.005" /><figcaption aria-hidden="true">Roughness 0.005</figcaption>
+</figure>
+<figure>
+<img src="CS 184 HW3.2 P2 Img Dragon 0.05.png" alt="Roughness 0.05" /><figcaption aria-hidden="true">Roughness 0.05</figcaption>
+</figure>
+<figure>
+<img src="CS 184 HW3.2 P2 Img Dragon 0.25.png" alt="Roughness 0.25" /><figcaption aria-hidden="true">Roughness 0.25</figcaption>
+</figure>
+<figure>
+<img src="CS 184 HW3.2 P2 Img Dragon 0.5.png" alt="Roughness 0.5" /><figcaption aria-hidden="true">Roughness 0.5</figcaption>
+</figure>
+<p>As the figure shows, the higher the roughness, the more diffuse the surface is. The lower the roughness, the surface behave more like a mirror, and the color of the surface represents more of the reflected light. Therefore, in a low roughness image, there are black regions (reflecting light from the observer side, which is 0), and blue regions (reflecting light from the blue wall). In a high roughness image, the color is almost gold as a diffuse material.</p>
+<h2 class="unnumbered" id="sampling-comparison">Sampling Comparison</h2>
+<p>The renderings of <code>sky/CBbunny_microfacet_cu.dae</code> of importance sampling and uniform hemisphere sampling are included as Fig.<a href="#fig:P2_bunny_cu" data-reference-type="ref" data-reference="fig:P2_bunny_cu">[fig:P2_bunny_cu]</a>.</p>
+<p>Following flags are used:</p>
+<p><code>-t 8 -s 64 -l 1 -m 5 -r 480 360</code></p>
+<figure>
+<img src="CS 184 HW3.2 P2 Img Bunny Importance.png" alt="Importance sampling" /><figcaption aria-hidden="true">Importance sampling</figcaption>
+</figure>
+<figure>
+<img src="CS 184 HW3.2 P2 Img Bunny Uniform.png" alt="Uniform hemisphere sampling" /><figcaption aria-hidden="true">Uniform hemisphere sampling</figcaption>
+</figure>
+<p>In the figure with uniform hemisphere sampling, there is a black line around the bunny. This is because at those point, the reflected angle is almost <span class="math inline">\(\frac{\pi}{2}\)</span>. If the incoming direction to those point are sampled uniformly in the hemisphere, then the micro surface normal between them would deviates significant from the macro surface normal (micro surface normal and macro surface normal has approximately <span class="math inline">\(\frac{\pi}{4}\)</span> angle between them). This would yield an exponentially low normal density term and thus, low bidirectional scattering distribution function. It would be very hard to sample close to the specular reflection direction.</p>
+<p>In addition, noise is reduced in the overall image due to the importance sampling on the bidirectional scattering distribution function.</p>
+<h2 class="unnumbered" id="additional-material">Additional Material</h2>
+<p>The rendering of <code>sky/CBdragon_microfacet_fe.dae</code> is included as Fig.<a href="#fig:P2_dragon_fe" data-reference-type="ref" data-reference="fig:P2_dragon_fe">1</a>.</p>
+<p>Following flags are used:</p>
+<p><code>-t 8 -s 128 -l 1 -m 5 -r 480 360</code></p>
+<p>The material is iron, Fe, with roughness 0.5. The complex index of refraction at RGB wavelengths are given as Tab.<a href="#tab:P2_fe_index_of_refraction" data-reference-type="ref" data-reference="tab:P2_fe_index_of_refraction">1</a></p>
+<div id="tab:P2_fe_index_of_refraction">
+<table>
+<caption>Complex index of refraction at RGB wavelengths of iron, Fe.</caption>
+<thead>
+<tr class="header">
+<th style="text-align: center;">Color</th>
+<th style="text-align: center;">Wavelength</th>
+<th style="text-align: center;">Complex index of refraction</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: center;">Red</td>
+<td style="text-align: center;">614nm</td>
+<td style="text-align: center;">2.8851+3.0449i</td>
+</tr>
+<tr class="even">
+<td style="text-align: center;">Green</td>
+<td style="text-align: center;">549nm</td>
+<td style="text-align: center;">2.9500+2.9300i</td>
+</tr>
+<tr class="odd">
+<td style="text-align: center;">Blue</td>
+<td style="text-align: center;">466nm</td>
+<td style="text-align: center;">2.6500+2.8095i</td>
+</tr>
+</tbody>
+</table>
+</div>
+<figure>
+<img src="CS 184 HW3.2 P2 Img Dragon Fe.png" id="fig:P2_dragon_fe" style="width:70.0%" alt="Rendering of sky/CBdragon_microfacet_fe.dae with material iron as specified in Tab.1. " /><figcaption aria-hidden="true">Rendering of <code>sky/CBdragon_microfacet_fe.dae</code> with material iron as specified in Tab.<a href="#tab:P2_fe_index_of_refraction" data-reference-type="ref" data-reference="tab:P2_fe_index_of_refraction">1</a>. </figcaption>
+</figure>
+<h1 class="unnumbered" id="collaboration">Collaboration</h1>
+<p>Wenhan Sun and Catherine Gai worked through all the project details together.</p>
+</body>
 </html>
