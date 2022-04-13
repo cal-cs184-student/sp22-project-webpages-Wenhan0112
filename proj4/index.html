@@ -1,7 +1,622 @@
-<html>
-	<head>
-	</head>
-	<body>
-		Project 4 here
-	</body>
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="" xml:lang="">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <meta name="author" content="Catherine Gai, Wenhan Sun" />
+  <title>CS 184 HW4 Report </title>
+  <style>
+    html {
+      line-height: 1.7;
+      font-family: Georgia, serif;
+      font-size: 20px;
+      color: #1a1a1a;
+      background-color: #fdfdfd;
+    }
+    body {
+      margin: 0 auto;
+      max-width: 40em;
+      padding-left: 50px;
+      padding-right: 50px;
+      padding-top: 50px;
+      padding-bottom: 50px;
+      hyphens: auto;
+      word-wrap: break-word;
+      text-rendering: optimizeLegibility;
+      font-kerning: normal;
+    }
+    @media (max-width: 600px) {
+      body {
+        font-size: 0.9em;
+        padding: 1em;
+      }
+    }
+    @media print {
+      body {
+        background-color: transparent;
+        color: black;
+      }
+      p, h2, h3 {
+        orphans: 3;
+        widows: 3;
+      }
+      h2, h3, h4 {
+        page-break-after: avoid;
+      }
+    }
+    p {
+      margin-top: 1.7em;
+    }
+    a {
+      color: #1a1a1a;
+    }
+    a:visited {
+      color: #1a1a1a;
+    }
+    img {
+      max-width: 100%;
+    }
+    h1, h2, h3, h4, h5, h6 {
+      margin-top: 1.7em;
+    }
+    ol, ul {
+      padding-left: 1.7em;
+      margin-top: 1.7em;
+    }
+    li > ol, li > ul {
+      margin-top: 0;
+    }
+    blockquote {
+      margin: 1.7em 0 1.7em 1.7em;
+      padding-left: 1em;
+      border-left: 2px solid #e6e6e6;
+      font-style: italic;
+    }
+    code {
+      font-family: Menlo, Monaco, 'Lucida Console', Consolas, monospace;
+      background-color: #f0f0f0;
+      font-size: 85%;
+      margin: 0;
+      padding: .2em .4em;
+    }
+    pre {
+      line-height: 1.5em;
+      padding: 1em;
+      background-color: #f0f0f0;
+      overflow: auto;
+    }
+    pre code {
+      padding: 0;
+      overflow: visible;
+    }
+    hr {
+      background-color: #1a1a1a;
+      border: none;
+      height: 1px;
+      margin-top: 1.7em;
+    }
+    table {
+      border-collapse: collapse;
+      width: 100%;
+      overflow-x: auto;
+      display: block;
+    }
+    th, td {
+      border-bottom: 1px solid lightgray;
+      padding: 1em 3em 1em 0;
+    }
+    header {
+      margin-bottom: 6em;
+      text-align: center;
+    }
+    nav a:not(:hover) {
+      text-decoration: none;
+    }
+    code{white-space: pre-wrap;}
+    span.smallcaps{font-variant: small-caps;}
+    span.underline{text-decoration: underline;}
+    div.column{display: inline-block; vertical-align: top; width: 50%;}
+    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+    ul.task-list{list-style: none;}
+  </style>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
+  <!--[if lt IE 9]>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/html5shiv/3.7.3/html5shiv-printshiv.min.js"></script>
+  <![endif]-->
+</head>
+<body>
+<header id="title-block-header">
+<h1 class="title"><span><strong>CS 184 HW4 Report</strong></span><br /></h1>
+<p class="author">Catherine Gai, Wenhan Sun</p>
+<p class="date">2022 Spring</p>
+</header>
+<h1 class="unnumbered" id="webpage-link">Webpage Link</h1>
+<p><a href="https://github.com/cal-cs184-student/sp22-project-webpages-Wenhan0112/blob/master/proj4/index.html">https://github.com/cal-cs184-student/sp22-project-webpages-Wenhan0112/blob/master/proj4/index.html</a></p>
+<h1 class="unnumbered" id="introduction">Introduction</h1>
+<p>In this homework, a cloth moving under a potential field with possible collision is simulated:</p>
+<ul>
+<li><p>Part 1: A cloth consisting of point masses and spring between point masses are created.</p></li>
+<li><p>Part 2: Movement under gravitation field is simulated using Verlet integration method.</p></li>
+<li><p>Part 3: Collision with other primitives (sphere and plane) is implemented. The collision is inelastic.</p></li>
+<li><p>Part 4: Self collision is implemented. This assume that the cloth has a specific thickness. The collision is inelastic.</p></li>
+</ul>
+<p>In addition in part 5, different shading techniques are implemented, including:</p>
+<ul>
+<li><p>Diffuse shading (Task 1): See Eq.<a href="#" data-reference-type="ref" data-reference="">[]</a>.</p></li>
+<li><p>Blinn-Phong shading (Task 2): See Eq.<a href="#" data-reference-type="ref" data-reference="">[]</a>.</p></li>
+<li><p>Texture mapping (Task 3): The sampled texture irradiance is used as the irradiance of the sample point.</p></li>
+<li><p>Bump mapping (Task 4.1): The microfacet surface height is stored as a texture which is used in the change in the normal direction.</p></li>
+<li><p>Displacement mapping (Task 4.2): In addition to bump mapping, the position of the vertex is also changed to account for the height map on the surface.</p></li>
+<li><p>Environment light mapping (Task 5): The surface is treated as a mirror which reflect environment light ideally given by the law of reflection.</p></li>
+</ul>
+<h1 class="unnumbered" id="part-1-masses-and-spring">Part 1: Masses and Spring</h1>
+<p>In this part, a rectangular cloth is initialized.</p>
+<ul>
+<li><p>A grid of point masses is initialized as <span class="math inline">\(\{P_{i,j}|i\in\mathbb{N}(n_w), j\in\mathbb{N}(n_h)\}\)</span> where <span class="math inline">\(n_w\in\mathbb{N}_+\)</span> and <span class="math inline">\(n_h\in\mathbb{N}_+\)</span> are the number of particles in the width and height direction of the cloth (<span class="math inline">\(n_w,n_h&gt;1\)</span>). <span class="math inline">\(\forall i\in\mathbb{N}(n_w)\)</span>, <span class="math inline">\(j\in\mathbb{N}(n_w)\)</span>, the initial position of <span class="math inline">\(P_{i,j}\)</span> is given by <span class="math inline">\(\left(\frac{i}{n_w-1}w, \frac{j}{n_h-1}h\right)\)</span>, where <span class="math inline">\(w\)</span> and <span class="math inline">\(h\)</span> are the width and height of the cloth respectively.</p></li>
+<li><p>There are three kinds of springs that links the point masses:</p>
+<ul>
+<li><p>Structural: The springs that make the backbone of the structure. That is,</p>
+<ul>
+<li><p><span class="math inline">\(\forall i\in\mathbb{N}_+(n_w-1)\)</span>, <span class="math inline">\(\forall j\in\mathbb{N}(n_h)\)</span>, <span class="math inline">\(P_{i-1,j}\)</span> and <span class="math inline">\(P_{i,j}\)</span> are connected. The rest length is <span class="math inline">\(\frac{w}{n_w-1}\)</span>.</p></li>
+<li><p><span class="math inline">\(\forall i\in\mathbb{N}(n_w)\)</span>, <span class="math inline">\(\forall j\in\mathbb{N}_+(n_h-1)\)</span>, <span class="math inline">\(P_{i,j-1}\)</span> and <span class="math inline">\(P_{i,j}\)</span> are connected. The rest length is <span class="math inline">\(\frac{h}{n_h-1}\)</span>.</p></li>
+<li><p>All springs have a constant spring constant given by <span class="math inline">\(k_s\)</span>.</p></li>
+</ul></li>
+<li><p>Shearing: Suppose there are only structural springs. Then given any shearing transformation in the cloth subspace applied to the the position of the point masses, the distance between any adjacent point masses remains unchanged. Therefore, in order to account for the stress induced by shearing, the follow springs are introduced to reduce shearing and retain symmetry:</p>
+<ul>
+<li><p><span class="math inline">\(\forall i\in\mathbb{N}_+(n_w-1)\)</span>, <span class="math inline">\(\forall j\in\mathbb{N}_+(n_h-1)\)</span>, <span class="math inline">\(P_{i-1,j-1}\)</span> and <span class="math inline">\(P_{i,j}\)</span> are connected. The rest length is <span class="math inline">\(\sqrt{\left(\frac{w}{n_w-1}\right)^2+\left(\frac{h}{n_h-1}\right)^2}\)</span>.</p></li>
+<li><p><span class="math inline">\(\forall i\in\mathbb{N}(n_w-1)\)</span>, <span class="math inline">\(\forall j\in\mathbb{N}_+(n_h-1)\)</span>, <span class="math inline">\(P_{i+1,j-1}\)</span> and <span class="math inline">\(P_{i,j}\)</span> are connected. The rest length is <span class="math inline">\(\sqrt{\left(\frac{w}{n_w-1}\right)^2+\left(\frac{h}{n_h-1}\right)^2}\)</span>.</p></li>
+<li><p>All springs have a constant spring constant given by <span class="math inline">\(k_s\)</span>, the same as that of the structural springs.</p></li>
+</ul></li>
+<li><p>Bending: Suppose there are only shearing and structural springs. Then the cloth is able to bend as a rolling piece of paper. The distance between the nearest and second nearest neighbor is also preserved. To account for the stress induced by bending, the following springs are introduced to reduce bending and retain symmetry:</p>
+<ul>
+<li><p><span class="math inline">\(\forall i\in\mathbb{Z}(2, n_w-1)\)</span>, <span class="math inline">\(\forall j\in\mathbb{N}(n_h)\)</span>, <span class="math inline">\(P_{i-1,j}\)</span> and <span class="math inline">\(P_{i,j}\)</span> are connected. The rest length is <span class="math inline">\(\frac{2w}{n_w-1}\)</span>.</p></li>
+<li><p><span class="math inline">\(\forall i\in\mathbb{N}(n_w)\)</span>, <span class="math inline">\(\forall j\in\mathbb{Z}(2, n_h-1)\)</span>, <span class="math inline">\(P_{i,j-2}\)</span> and <span class="math inline">\(P_{i,j}\)</span> are connected. The rest length is <span class="math inline">\(\frac{2h}{n_h-1}\)</span>.</p></li>
+<li><p>All springs have a constant spring constant given by <span class="math inline">\(\eta k_s\)</span>, where <span class="math inline">\(k_s\)</span> is the spring constant for the structural springs and <span class="math inline">\(\eta\)</span> is the bending spring constant coefficient.</p></li>
+<li><p>In the implementation <span class="math inline">\(\eta = 0.2\)</span>.</p></li>
+</ul></li>
+</ul></li>
+<li><p>Some of the point masses have fixed positions because they are desired to be non-moving.</p></li>
+</ul>
+<p>The rendering of <code>scene/pinned4.json</code> with all springs in wireframe is included as Fig.<a href="#fig:p1_all" data-reference-type="ref" data-reference="fig:p1_all">1</a>. The rendering of <code>scene/pinned4.json</code> with only shearing springs and no shearing springs in wireframe are included as Fig.<a href="#fig:p1_with_and_without_shearing" data-reference-type="ref" data-reference="fig:p1_with_and_without_shearing">[fig:p1_with_and_without_shearing]</a>.</p>
+<figure>
+<img src="CS 184 HW4 P1 Img All.png" id="fig:p1_all" style="width:80.0%" alt="Rendering of scene/pinned4.json with all springs in wireframe." /><figcaption aria-hidden="true">Rendering of <code>scene/pinned4.json</code> with all springs in wireframe.</figcaption>
+</figure>
+<figure>
+<img src="CS 184 HW4 P1 Img No Shearing.png" alt="Without shearing springs" /><figcaption aria-hidden="true">Without shearing springs</figcaption>
+</figure>
+<figure>
+<img src="CS 184 HW4 P1 Img Only Shearing.png" alt="With shearing springs" /><figcaption aria-hidden="true">With shearing springs</figcaption>
+</figure>
+<h1 class="unnumbered" id="part-2-simulation-via-numerical-integration">Part 2: Simulation via Numerical Integration</h1>
+<h2 class="unnumbered" id="task-1-compute-total-force-acting-on-each-point-mass">Task 1: Compute Total Force Acting on Each Point Mass</h2>
+<p>In this part, Verlet method is implemented for the cloth.</p>
+<p>Suppose the following:</p>
+<ul>
+<li><p><span class="math inline">\(m\)</span> is the mass of the point masses.</p></li>
+<li><p><span class="math inline">\(\mathbf{a}_{\mathrm{ext}}\)</span> is the total external acceleration.</p></li>
+<li><p><span class="math inline">\(P\)</span> is the set of point masses.</p></li>
+<li><p><span class="math inline">\(S\)</span> is the set of springs.</p></li>
+<li><p><span class="math inline">\(f\)</span> is a function defined in <span class="math inline">\(P\to\mathcal{P}(S)\)</span>, the power set of <span class="math inline">\(S\)</span> such that it maps a point mass to every springs that connects to the point mass.</p></li>
+<li><p><span class="math inline">\(g\)</span> is a function defined in <span class="math inline">\(\{(p,s)\in P\times S|s\in f(p)\}\to P\)</span> such that it maps a point mass and a spring that connects the point mass to the other point mass that the spring connects.</p></li>
+<li><p><span class="math inline">\(l_0\)</span> is a function defined in <span class="math inline">\(S\to \mathbb{R}_+\)</span> that maps a spring to its rest length.</p></li>
+<li><p><span class="math inline">\(k_s\)</span> is a function defined in <span class="math inline">\(S\to\mathbb{R}_+\)</span> that maps a spring to its spring constant.</p></li>
+<li><p><span class="math inline">\(\mathbf{r}\)</span> is a function defined in <span class="math inline">\(P\to\mathbb{R}^3\)</span> which maps a point mass to its position.</p></li>
+</ul>
+<p>Then <span class="math inline">\(\forall p\in P\)</span>, the force on <span class="math inline">\(p\)</span> is given by the equation: <span class="math display">\[m\mathbf{a}_{\mathrm{ext}} + \displaystyle\sum_{s\in f(p)} k_s(s)(\|\mathbf{r}(g(p, s)) - \mathbf{r}(p)\| - l_0(s)) \frac{\mathbf{r}(g(p, s)) - \mathbf{r}(p)}{\|\mathbf{r}(g(p, s)) - \mathbf{r}(p)\|}\]</span></p>
+<p>The accelerated method is as the following:</p>
+<ul>
+<li><p>Initialize all point masses with force <span class="math inline">\(m\mathbf{a}_{\mathrm{ext}}\)</span></p></li>
+<li><p>For each spring <span class="math inline">\(s\in S\)</span> connecting point masses <span class="math inline">\(p\)</span> and <span class="math inline">\(p&#39;\)</span>, compute the force acting on <span class="math inline">\(p_a\)</span> by the spring <span class="math inline">\(s\)</span>: <span class="math display">\[k_s(s)(\|\mathbf{r}(p&#39;) - \mathbf{r}(p)\| - l_0(s)) \frac{\mathbf{r}(p&#39;) - \mathbf{r}(p)}{\|\mathbf{r}(p&#39;) - \mathbf{r}(p)\|}\]</span> Then the force is exerted on <span class="math inline">\(p\)</span> and the negative of that is exert on <span class="math inline">\(p&#39;\)</span>. Therefore, there is an increment of force on <span class="math inline">\(p\)</span> of that value and a decrement of force on <span class="math inline">\(p&#39;\)</span> of that value.</p></li>
+</ul>
+<h2 class="unnumbered" id="task-2-use-verlet-integration-to-compute-new-point-mass-positions">Task 2: Use Verlet Integration to Compute New Point Mass Positions</h2>
+<p>To solve for a differential equation of variable <span class="math inline">\(x\in(\mathbb{R}\to\mathbb{R}^n)\)</span> for <span class="math inline">\(n\in\mathbb{N}_+\)</span>: <span class="math display">\[\ddot{x} = a\circ x\]</span> where <span class="math inline">\(a\)</span> is a function in <span class="math inline">\(\mathbb{R}^n\to\mathbb{R}^n\)</span> with initial condition <span class="math inline">\(x(0) = x_0\)</span> and <span class="math inline">\(v(0) = 0\)</span>, the Verlet Integration method could be used: <span class="math inline">\(\forall t=i\Delta\in\{i\Delta|i\in\mathbb{N}\}\)</span> where <span class="math inline">\(\Delta\in\mathbb{R}_+\)</span>, <span class="math inline">\(x(t)\)</span> is approximated by <span class="math inline">\(x_i\)</span>, where</p>
+<ul>
+<li><p><span class="math inline">\(x_{-1}=x_0\)</span></p></li>
+<li><p><span class="math inline">\(\forall i\in\mathbb{N}\)</span>, <span class="math inline">\(x_{i+1} = 2x_i-x_{i-1}+a(x_i)\Delta^2\)</span>. This is called the update rule.</p></li>
+</ul>
+<p>Verlet Integration is a second order symplectic integration method that preserves energy. In the implementation, however, to account for the friction and loss of energy in the system, a velocity damping factor <span class="math inline">\(d\in[0,1]\)</span> is included in the update rule. <span class="math inline">\(0\)</span> damping factor indicates no damping and higher damping constant represents a higher damping. <span class="math display">\[x_{i+1} = x_i + (1-d)(x_i-x_{i-1})+a(x_i)\Delta^2\]</span></p>
+<h2 class="unnumbered" id="task-3-constrain-position-updates">Task 3: Constrain Position Updates</h2>
+<p>Despite the fact that Verlet method is symplectic, it is not guaranteed to be stable. Constraints are needed to establish stability. The constraint algorithm are implemented as below:</p>
+<h2 class="unnumbered" id="parameter-dependence">Parameter Dependence</h2>
+<h3 class="unnumbered" id="spring-constant-and-density">Spring Constant and Density</h3>
+<p>The rendering of <code>scene/pinned2.json</code> at rest state in wireframe with normal spring constant and density values is included as Fig.<a href="#fig:p2_normal_ks_density" data-reference-type="ref" data-reference="fig:p2_normal_ks_density">2</a>.</p>
+<p>The rendering of <code>scene/pinned2.json</code> at rest state in wireframe with lower and higher than normal spring constant values is included as Fig.<a href="#fig:p2_vary_ks" data-reference-type="ref" data-reference="fig:p2_vary_ks">[fig:p2_vary_ks]</a>.</p>
+<p>The rendering of <code>scene/pinned2.json</code> at rest state in wireframe with lower and higher than normal density values is included as Fig.<a href="#fig:p2_vary_density" data-reference-type="ref" data-reference="fig:p2_vary_density">[fig:p2_vary_density]</a>.</p>
+<figure>
+<img src="CS 184 HW4 P2 Img Normal.png" id="fig:p2_normal_ks_density" style="width:80.0%" alt="Rendering of scene/pinned2.json at rest state in wireframe with normal spring constant and density values." /><figcaption aria-hidden="true">Rendering of <code>scene/pinned2.json</code> at rest state in wireframe with normal spring constant and density values.</figcaption>
+</figure>
+<figure>
+<img src="CS 184 HW4 P2 Img ks Low.png" alt="Low spring constant 50\mathrm{N/m}. " /><figcaption aria-hidden="true">Low spring constant <span class="math inline">\(50\mathrm{N/m}\)</span>. </figcaption>
+</figure>
+<figure>
+<img src="CS 184 HW4 P2 Img ks High.png" alt="High spring constant 50000\mathrm{N/m}" /><figcaption aria-hidden="true">High spring constant <span class="math inline">\(50000\mathrm{N/m}\)</span></figcaption>
+</figure>
+<figure>
+<img src="CS 184 HW4 P2 Img Density Low.png" alt="Low surface density 1.5\mathrm{g/cm^2}. " /><figcaption aria-hidden="true">Low surface density <span class="math inline">\(1.5\mathrm{g/cm^2}\)</span>. </figcaption>
+</figure>
+<figure>
+<img src="CS 184 HW4 P2 Img Density High.png" alt="High surface density 1500\mathrm{g/cm^2}" /><figcaption aria-hidden="true">High surface density <span class="math inline">\(1500\mathrm{g/cm^2}\)</span></figcaption>
+</figure>
+<p>The equation of motion for the list of particles is given by: <span class="math inline">\(\forall p\in P\)</span>, <span class="math inline">\(\forall t\in\mathbb{R}\)</span>, <span class="math display">\[m\ddot{\mathbf{r}}(p, t) =m\mathbf{a}_{\mathrm{ext}} + \displaystyle\sum_{s\in f(p)} k_s(s)(\|\mathbf{r}(g(p, s), t) - \mathbf{r}(p, t)\| - l_0(s)) \frac{\mathbf{r}(g(p, s), t) - \mathbf{r}(p, t)}{\|\mathbf{r}(g(p, s), t) - \mathbf{r}(p, t)\|}\]</span></p>
+<p>where all definition follows Part 2 Task 1 except:</p>
+<ul>
+<li><p><span class="math inline">\(\mathbf{r}\)</span> is a function defined in <span class="math inline">\(P\times\mathbb{R}\to\mathbb{R}^3\)</span> such that it maps a point mass <span class="math inline">\(p\)</span> and time <span class="math inline">\(t\)</span> to the position of the point mass <span class="math inline">\(p\)</span> at time <span class="math inline">\(t\)</span>.</p></li>
+<li><p><span class="math inline">\(\ddot{\mathbf{r}} = \dfrac{\partial^2 \mathbf{r}}{\partial t^2}\)</span></p></li>
+</ul>
+<p>The equation of motion then could be written as: <span class="math inline">\(\forall p\in P\)</span>, <span class="math inline">\(\forall t\in\mathbb{R}\)</span>, <span class="math display">\[\ddot{\mathbf{r}}(p, t) =\mathbf{a}_{\mathrm{ext}} + \displaystyle\sum_{s\in f(p)} \frac{k_s(s)}{m}(\|\mathbf{r}(g(p, s), t) - \mathbf{r}(p, t)\| - l_0(s)) \frac{\mathbf{r}(g(p, s), t) - \mathbf{r}(p, t)}{\|\mathbf{r}(g(p, s), t) - \mathbf{r}(p, t)\|}\]</span></p>
+<p>Therefore, if <span class="math inline">\(\frac{k_s}{m}\)</span> is a constant, then the motion of the particle should be the same, regardless of the actual value of <span class="math inline">\(k_s\)</span> and <span class="math inline">\(m\)</span>. This constant is proportional to the ratio of the spring constant over surface mass density of the cloth.</p>
+<p>Moreover, the higher the ratio, the stiffer the cloth, the less the cloth deforms, and vice versa. This is visually verified in Fig.<a href="#fig:p2_vary_density" data-reference-type="ref" data-reference="fig:p2_vary_density">[fig:p2_vary_density]</a> and Fig.<a href="#fig:p2_vary_ks" data-reference-type="ref" data-reference="fig:p2_vary_ks">[fig:p2_vary_ks]</a>. In addition, the low density simulation has a density <span class="math inline">\(\frac{1}{10}\)</span> of the normal density, while the high spring constant simulation has a spring constant <span class="math inline">\(10\)</span> times of the normal spring constant. Therefore, their spring constant over density ratio is the same, which leads to similar rest state. This is verified visually. This is also the case of the low spring constant simulation (<span class="math inline">\(\frac{1}{100}\)</span> of the original) and the high density simulation (<span class="math inline">\(100\)</span> times of the original).</p>
+<h3 class="unnumbered" id="damping">Damping</h3>
+<p>The renderings of <code>scene/pinned2.json</code> after <span class="math inline">\(60\)</span> steps in wireframe with various damping values are included as Fig.<a href="#fig:p2_damping" data-reference-type="ref" data-reference="fig:p2_damping">[fig:p2_damping]</a>.</p>
+<figure>
+<img src="CS 184 HW4 P2 Img Damping Low.png" alt="Low damping 0.01\%. " /><figcaption aria-hidden="true">Low damping <span class="math inline">\(0.01\%\)</span>. </figcaption>
+</figure>
+<figure>
+<img src="CS 184 HW4 P2 Img Damping Normal.png" alt="Normal damping 0.2\%" /><figcaption aria-hidden="true">Normal damping <span class="math inline">\(0.2\%\)</span></figcaption>
+</figure>
+<figure>
+<img src="CS 184 HW4 P2 Img Damping High.png" alt="High damping 1\%" /><figcaption aria-hidden="true">High damping <span class="math inline">\(1\%\)</span></figcaption>
+</figure>
+<p>There are three occasions to consider:</p>
+<ul>
+<li><p>Low damping: There is almost no energy losses. Therefore, the cloths swings back and forth around the pinned point masses. This is the underdamped case. In addition, due to the softness of the cloth and the chaotic nature of the physical system, the corner or the edge of the cloth may be curved or folded due to the excessive amount of energy.</p></li>
+<li><p>Normal damping: The cloth comes to a complete stop without significant swings. This is the critically damped or overdamped case.</p></li>
+<li><p>High damping: The cloth moves in a "uniform" manner, that is, almost at equilibrium motion where the gravity is canceled by the friction. This is the overdamped case.</p></li>
+</ul>
+<h2 class="unnumbered" id="rest-state-with-shading">Rest State with Shading</h2>
+<p>The rendering of <code>scene/pinned2.json</code> at rest state with normal shading is included as Fig.<a href="#fig:p2_shading" data-reference-type="ref" data-reference="fig:p2_shading">3</a>.</p>
+<figure>
+<img src="CS 184 HW4 P2 Img Normal Shading.png" id="fig:p2_shading" style="width:80.0%" alt="Rendering of scene/pinned2.json at rest state with normal shading. " /><figcaption aria-hidden="true">Rendering of <code>scene/pinned2.json</code> at rest state with normal shading. </figcaption>
+</figure>
+<h1 class="unnumbered" id="part-3-handling-collisions-with-other-objects">Part 3: Handling Collisions with Other Objects</h1>
+<h2 class="unnumbered" id="task-1-handing-collisions-with-spheres">Task 1: Handing Collisions with Spheres</h2>
+<p>The algorithm handling the collision between a point mass and a static sphere is given as follows:</p>
+<h2 class="unnumbered" id="task-2-handling-collisions-with-planes">Task 2: Handling Collisions with Planes</h2>
+<p>The algorithm handling the collision between a point mass and a static plane is given as follows:</p>
+<h2 class="unnumbered" id="renderings-of-sphere-collision">Renderings of Sphere Collision</h2>
+<p>The renderings of <code>scene/sphere.json</code> at rest state with normal shading and various spring constant are included as Fig.<a href="#fig:p3_sphere" data-reference-type="ref" data-reference="fig:p3_sphere">[fig:p3_sphere]</a>.</p>
+<p>Note that the higher the spring constant, the stiffer the cloth, and the more rigid the cloth is. Lower spring constant on the other hand results in the cloth clinging more closely on the sphere. This is visually observed in Fig.<a href="#fig:p3_sphere" data-reference-type="ref" data-reference="fig:p3_sphere">[fig:p3_sphere]</a>.</p>
+<figure>
+<img src="CS 184 HW4 P3 Img ks 5e2.png" alt="Spring constant 500\mathrm{N/m} " /><figcaption aria-hidden="true">Spring constant <span class="math inline">\(500\mathrm{N/m}\)</span> </figcaption>
+</figure>
+<figure>
+<img src="CS 184 HW4 P3 Img ks 5e3.png" alt="Spring constant 5000\mathrm{N/m} " /><figcaption aria-hidden="true">Spring constant <span class="math inline">\(5000\mathrm{N/m}\)</span> </figcaption>
+</figure>
+<figure>
+<img src="CS 184 HW4 P3 Img ks 5e4.png" alt="Spring constant 50000\mathrm{N/m} " /><figcaption aria-hidden="true">Spring constant <span class="math inline">\(50000\mathrm{N/m}\)</span> </figcaption>
+</figure>
+<h2 class="unnumbered" id="rendering-of-plane-collision">Rendering of Plane Collision</h2>
+<p>The rendering of <code>scene/plane.json</code> at rest state with normal shading is included as Fig.<a href="#fig:p3_plane" data-reference-type="ref" data-reference="fig:p3_plane">4</a>.</p>
+<figure>
+<img src="CS 184 HW4 P3 Img Plane.png" id="fig:p3_plane" style="width:80.0%" alt="Rendering of scene/plane.json at rest state with normal shading" /><figcaption aria-hidden="true">Rendering of <code>scene/plane.json</code> at rest state with normal shading</figcaption>
+</figure>
+<h1 class="unnumbered" id="part-4-handling-self-collisions">Part 4: Handling Self-Collisions</h1>
+<p>In this part, collisions between point masses are handled. A naive version algorithm is given by:</p>
+<p>However, this naive method has a time complexity of <span class="math display">\[O\left(\binom{|P|}{2}\right) = O(|P|^2)\]</span> where <span class="math inline">\(P\)</span> is the set of point masses.</p>
+<p>With proper hashing, the time complexity could be reduced.</p>
+<h2 class="unnumbered" id="task-1-hash-position">Task 1: Hash Position</h2>
+<p>Since two point masses collide only if they are less than 2 thickness apart, it is reasonable to use spatial hashing. A way to do spatial hashing is to partition the space into boxes and associate the hash of the particle to the hash of the index of the box that the point mass belongs to.</p>
+<p>Suppose <span class="math inline">\((\mathbf{e}_1,\mathbf{e_2},\mathbf{e}_3)\)</span> is the standard basis of <span class="math inline">\(\mathbb{R}^3\)</span>. Suppose the space <span class="math inline">\(\mathbb{R}^3\)</span> is partitioned into boxes of size <span class="math inline">\(w_1,w_2,w_3\in\mathbb{R}_+\)</span>: <span class="math display">\[B=\{\{(i_1+x_1)w_1\mathbf{e}_1+(i_2+x_2)w_2\mathbf{e}_2+(i_3+x_3)w_3\mathbf{e}_3|x_1,x_2,x_3\in[0,1) \}|i_1,i_2,i_3\in\mathbb{Z}\}\]</span> where <span class="math display">\[\displaystyle\bigcup\limits_{b\in B}b = \mathbb{R}^3\]</span></p>
+<p>Moreover, there is a bijective function <span class="math inline">\(f\)</span> in <span class="math inline">\(\mathbb{Z}^3\to B\)</span>: <span class="math display">\[(i_1,i_2,i_3)\mapsto \{(i_1+x_1)w_1\mathbf{e}_1+(i_2+x_2)w_2\mathbf{e}_2+(i_3+x_3)w_3\mathbf{e}_3|x_1,x_2,x_3\in[0,1) \}\]</span></p>
+<p>Therefore, <span class="math inline">\(\forall \mathbf{r}=r_1\mathbf{e}_1+r_2\mathbf{e}_2+r_3\mathbf{e}_3\in\mathbb{R}^3\)</span>, where <span class="math inline">\(r_1,r_2,r_3\in\mathbb{R}\)</span>, <span class="math display">\[\exists (i_1,i_2,i_3) = \left(\mathrm{int}\left(\frac{r_1}{w_1}\right), \mathrm{int}\left(\frac{r_2}{w_2}\right), \mathrm{int}\left(\frac{r_3}{w_3}\right)\right)\]</span> such that <span class="math inline">\(\mathbf{r}\in f(i_1,i_2,i_3)\)</span>.</p>
+<p>To hash the indices of the bounding box, a general method is used:</p>
+<p>A hash function to hash <span class="math inline">\(\mathbb{Z}^N\)</span> where <span class="math inline">\(N\in\mathbb{N}_+\)</span> is: <span class="math display">\[\{i_j|j\in\mathbb{N}_+(N)\} = \displaystyle\prod_{j=1}^Np_j^{i_j}\]</span> where <span class="math inline">\(\{p_j|j\in\mathbb{N}_+(N)\}\)</span> is a sequence of distinct primes.</p>
+<p>Therefore, combining the method to partition a space into boxes, find the corresponding box indices of a position, and hashing the box indices, the following hash function is used to to hash <span class="math inline">\(\mathbb{R}^3\)</span>: <span class="math display">\[r_1\mathbf{e}_1+r_2\mathbf{e}_2+r_3\mathbf{e}_3 \mapsto p_1^{\mathrm{int}\left(\frac{r_1}{w_1}\right)}p_2^{\mathrm{int}\left(\frac{r_2}{w_2}\right)}p_3^{\mathrm{int}\left(\frac{r_3}{w_3}\right)}\]</span> where <span class="math inline">\(w_1,w_2,w_3\in\mathbb{R}\)</span> and <span class="math inline">\(p_1,p_2,p_3\)</span> are three distinct primes.</p>
+<p>In the implementation, the following parameters are used:</p>
+<ul>
+<li><p>Suppose the grid size of the point masses is <span class="math inline">\((n_w,n_h)\)</span>.</p></li>
+<li><p>Suppose the size of the cloth is <span class="math inline">\((w,h)\)</span>.</p></li>
+<li><p><span class="math inline">\(w_1=\dfrac{3w}{n_w}\)</span></p></li>
+<li><p><span class="math inline">\(w_2=\dfrac{3h}{n_h}\)</span></p></li>
+<li><p><span class="math inline">\(w_3 = \max(w_1,w_2) = \max\left(\dfrac{3w}{n_w}, \dfrac{3h}{n_h}\right)\)</span></p></li>
+<li><p><span class="math inline">\(p_1=2\)</span></p></li>
+<li><p><span class="math inline">\(p_2=3\)</span></p></li>
+<li><p><span class="math inline">\(p_3=5\)</span></p></li>
+</ul>
+<h2 class="unnumbered" id="task-2-build-spatial-map">Task 2: Build Spatial Map</h2>
+<p>A data structure <span class="math inline">\(f\)</span> to host the hash value and point masses is built, named as the spatial map:</p>
+<ul>
+<li><p>The data structure is an unordered map <span class="math inline">\(\mathbb{R}\to \mathcal{P}(P)\)</span>, the power set of the set of point masses.</p></li>
+<li><p><span class="math inline">\(\forall x\)</span> in the domain of <span class="math inline">\(f\)</span>. <span class="math inline">\(f(x)\)</span> is the set of point masses which has hash <span class="math inline">\(x\)</span>.</p></li>
+</ul>
+<p>To construct it, the following algorithm is used:</p>
+<h2 class="unnumbered" id="task-3-self-collision">Task 3: Self Collision</h2>
+<p>The self collision algorithm is included below:</p>
+<h2 class="unnumbered" id="renderings-of-self-collision">Renderings of Self Collision</h2>
+<p>The renderings of <code>scene/selfCollision.json</code> with normal shading and various time steps are included as Fig.<a href="#fig:p4_normal" data-reference-type="ref" data-reference="fig:p4_normal">[fig:p4_normal]</a>.</p>
+<figure>
+<img src="CS 184 HW4 P4 Img Normal Initial.png" alt="Initial collision " /><figcaption aria-hidden="true">Initial collision </figcaption>
+</figure>
+<figure>
+<img src="CS 184 HW4 P4 Img Normal Halfway.png" alt="Falling halfpoint" /><figcaption aria-hidden="true">Falling halfpoint</figcaption>
+</figure>
+<figure>
+<img src="CS 184 HW4 P4 Img Normal Final.png" alt="Final collision " /><figcaption aria-hidden="true">Final collision </figcaption>
+</figure>
+<figure>
+<img src="CS 184 HW4 P4 Img Normal Rest.png" alt="Rest state" /><figcaption aria-hidden="true">Rest state</figcaption>
+</figure>
+<h2 class="unnumbered" id="varying-spring-constant-and-density">Varying Spring Constant and Density</h2>
+<p>The rendering of <code>scene/selfCollision.json</code> at rest state with normal shading and normal spring constant and density values is included as Fig.<a href="#fig:p4_normal_ks_density" data-reference-type="ref" data-reference="fig:p4_normal_ks_density">5</a>.</p>
+<p>The renderings of <code>scene/selfCollision.json</code> at rest state with normal shading and lower and higher than normal spring constant values is included as Fig.<a href="#fig:p4_vary_ks" data-reference-type="ref" data-reference="fig:p4_vary_ks">[fig:p4_vary_ks]</a>.</p>
+<p>The renderings of <code>scene/selfCollision.json</code> at rest state with normal shading and lower and higher than normal density values is included as Fig.<a href="#fig:p4_vary_density" data-reference-type="ref" data-reference="fig:p4_vary_density">[fig:p4_vary_density]</a>.</p>
+<figure>
+<img src="CS 184 HW4 P4 Img Normal.png" id="fig:p4_normal_ks_density" style="width:80.0%" alt="Rendering of scene/selfCollision.json at rest state with normal shading and normal spring constant and density values." /><figcaption aria-hidden="true">Rendering of <code>scene/selfCollision.json</code> at rest state with normal shading and normal spring constant and density values.</figcaption>
+</figure>
+<figure>
+<img src="CS 184 HW4 P4 Img ks Low.png" alt="Low spring constant 50\mathrm{N/m}. " /><figcaption aria-hidden="true">Low spring constant <span class="math inline">\(50\mathrm{N/m}\)</span>. </figcaption>
+</figure>
+<figure>
+<img src="CS 184 HW4 P4 Img ks High.png" alt="High spring constant 50000\mathrm{N/m}" /><figcaption aria-hidden="true">High spring constant <span class="math inline">\(50000\mathrm{N/m}\)</span></figcaption>
+</figure>
+<figure>
+<img src="CS 184 HW4 P4 Img Density Low.png" alt="Low surface density 1.5\mathrm{g/cm^2}. " /><figcaption aria-hidden="true">Low surface density <span class="math inline">\(1.5\mathrm{g/cm^2}\)</span>. </figcaption>
+</figure>
+<figure>
+<img src="CS 184 HW4 P4 Img Density High.png" alt="High surface density 1500\mathrm{g/cm^2}" /><figcaption aria-hidden="true">High surface density <span class="math inline">\(1500\mathrm{g/cm^2}\)</span></figcaption>
+</figure>
+<p>As previously analyzed in Part 2, the motion of the cloth only depends on the ratio of the spring constant to the surface density of the cloth. The higher the ratio, the more stiff the cloth, the less deformation the cloth has upon collision, and vice versa.</p>
+<p>Low spring constant simulation and high density simulation share the same ratio, which is lower than normal. The cloth spread less due to its softness, and more layers of cloth are stacked on one another.</p>
+<p>High spring constant simulation and low density simulation share the same ratio, which is higher than normal. The cloth is less deformed due to its stiffness. Moreover, most of the deformation occurs due to the change in the weaker bending springs, not the structural or shearing springs.</p>
+<h1 class="unnumbered" id="part-5-shaders">Part 5: Shaders</h1>
+<p>In this part, multiple kinds of shaders are included. A shader is defined as a program in the rasterization pipeline.</p>
+<p>The shaders implemented come in two categories:</p>
+<ul>
+<li><p>Vertex shader: A shader program that process the vertex data.<br />
+For instance:</p>
+<ul>
+<li><p>Manipulate the position of the vertex in homogeneous coordinate.</p></li>
+<li><p>Manipulate the vertex normal in homogeneous coordinate.</p></li>
+</ul></li>
+<li><p>Fragment shader: A shader program that process the rasterized pixel of the data.<br />
+For instance:</p>
+<ul>
+<li><p>Sample the texture from given texture coordinate.</p></li>
+<li><p>Compute lighting given by the scene (location of the light source and the camera, etc.)</p></li>
+</ul></li>
+</ul>
+<h2 class="unnumbered" id="task-1-diffuse-shading">Task 1: Diffuse Shading</h2>
+<p>Suppose there is a point light source in the scene at <span class="math inline">\(\mathbf{r}_0\)</span> with intensity <span class="math inline">\(I\)</span>. For any point on the surface of the rendered object with position <span class="math inline">\(\mathbf{r}\in\mathbb{R}^3\)</span> and outward normal <span class="math inline">\(\mathbf{n}\in\partial B(\mathbf{0},1)\)</span>, the light intensity that the observer receives in given by: <span class="math display">\[k_d \frac{I}{|\mathbf{r}-\mathbf{r}_0|^2}\max(0,\mathbf{n}\cdot\mathbf{l}) = k_d \frac{I}{|\mathbf{r}-\mathbf{r}_0|^2}\max\left(0,\mathbf{n}\cdot\frac{\mathbf{r}_0-\mathbf{r}}{|\mathbf{r}_0-\mathbf{r}|}\right)\]</span> where</p>
+<ul>
+<li><p><span class="math inline">\(\mathbf{l} = \frac{\mathbf{r}_0-\mathbf{r}}{|\mathbf{r}_0-\mathbf{r}|}\)</span>: the direction from the point to the light source.</p></li>
+<li><p><span class="math inline">\(k_d\)</span>: the diffuse reflection coefficient of the surface.</p></li>
+</ul>
+<p>In the implementation, the following parameter is used:</p>
+<ul>
+<li><p><span class="math inline">\(k_d=1\)</span> for all color channels.</p></li>
+</ul>
+<h3 class="unnumbered" id="task-1-diffuse-shading-summary">Task 1: Diffuse Shading Summary</h3>
+<p>Suppose:</p>
+<ul>
+<li><p>There is a point light source in the scene at <span class="math inline">\(\mathbf{r}_0\)</span> with intensity <span class="math inline">\(I\)</span>.</p></li>
+<li><p>The observer in the scene is at <span class="math inline">\(\mathbf{r}_c\)</span>.</p></li>
+</ul>
+<p>For any point on the surface of the rendered object with:</p>
+<ul>
+<li><p>position <span class="math inline">\(\mathbf{r}\in\mathbb{R}^3\)</span></p></li>
+<li><p>outward normal <span class="math inline">\(\mathbf{n}\in\partial B(\mathbf{0},1)\)</span></p></li>
+</ul>
+<p>Then the light intensity is given by: <span class="math display">\[k_d \frac{I}{|\mathbf{r}-\mathbf{r}_0|^2}\max(0,\mathbf{n}\cdot\mathbf{l})\]</span> where</p>
+<ul>
+<li><p><span class="math inline">\(\mathbf{l} = \frac{\mathbf{r}_0-\mathbf{r}}{|\mathbf{r}_0-\mathbf{r}|}\)</span></p></li>
+<li><p><span class="math inline">\(k_d\)</span>: the diffuse reflection coefficient of the surface.</p></li>
+</ul>
+<h2 class="unnumbered" id="task-2-blinn-phong-shading">Task 2: Blinn-Phong Shading</h2>
+<p>Suppose there is a point light source in the scene at <span class="math inline">\(\mathbf{r}_0\)</span> with intensity <span class="math inline">\(I\)</span>. Suppose the observer in the scene is at <span class="math inline">\(\mathbf{r}_c\)</span>. For any point on the surface of the rendered object with position <span class="math inline">\(\mathbf{r}\in\mathbb{R}^3\)</span> and outward normal <span class="math inline">\(\mathbf{n}\in\partial B(\mathbf{0},1)\)</span>, the light intensity that the observer receives is given by: <span class="math display">\[k_aI_a + k_d \frac{I}{|\mathbf{r}-\mathbf{r}_0|^2}\max(0,\mathbf{n}\cdot\mathbf{l}) + k_s\frac{I}{|\mathbf{r}-\mathbf{r}_0|^2}(\max(0,\mathbf{n}\cdot\mathbf{h}))^p\]</span> where</p>
+<ul>
+<li><p><span class="math inline">\(k_aI_a\)</span> is defined as the ambient light intensity.</p>
+<ul>
+<li><p>This term is independent of both the light source direction and the observer direction.</p></li>
+</ul></li>
+<li><p><span class="math inline">\(k_d \frac{I}{|\mathbf{r}-\mathbf{r}_0|^2}\max(0,\mathbf{n}\cdot\mathbf{l})\)</span> is defined as the diffuse light intensity.</p>
+<ul>
+<li><p>This term is independent of the observer direction, but depends only on the light source direction.</p></li>
+</ul></li>
+<li><p><span class="math inline">\(k_s\frac{I}{|\mathbf{r}-\mathbf{r}_0|^2}(\max(0,\mathbf{n}\cdot\mathbf{h}))^p\)</span> is defined as the specular light intensity.</p></li>
+<li><p><span class="math inline">\(\mathbf{l} = \frac{\mathbf{r}_0-\mathbf{r}}{|\mathbf{r}_0-\mathbf{r}|}\)</span>: the direction from the point to the light source.</p></li>
+<li><p><span class="math inline">\(\mathbf{v}=\frac{\mathbf{r}_c-\mathbf{r}}{|\mathbf{r}_c-\mathbf{r}|}\)</span>: the direction from the point to the observer.</p></li>
+<li><p><span class="math inline">\(\mathbf{h} = \frac{\mathbf{v}+\mathbf{l}}{|\mathbf{v}+\mathbf{l}|}\)</span>: the direction in which if it is the normal direction of the surface point, the incoming light from the light source can be reflected ideally to the observer.</p>
+<ul>
+<li><p>This is why the specular light intensity is named specular: specular reflection occurs if the normal is close to this direction.</p></li>
+</ul></li>
+<li><p><span class="math inline">\(k_a\)</span>: the ambient reflection coefficient of the surface.</p></li>
+<li><p><span class="math inline">\(I_a\)</span>: the ambient light intensity of the scene.</p></li>
+<li><p><span class="math inline">\(k_d\)</span>: the diffuse reflection coefficient of the surface.</p></li>
+<li><p><span class="math inline">\(k_s\)</span>: the specular reflection coefficient of the surface.</p></li>
+<li><p><span class="math inline">\(p\)</span>: the specular reflection exponent of the surface.</p></li>
+</ul>
+<p>In the implementation, the following parameters are used:</p>
+<ul>
+<li><p><span class="math inline">\(k_a=0.1\)</span> for all color channels.</p></li>
+<li><p><span class="math inline">\(I_a=1\)</span> for all color channels.</p></li>
+<li><p><span class="math inline">\(k_d\)</span> is given by the input color of the surface.</p></li>
+<li><p><span class="math inline">\(k_s=0.5\)</span> for all color channels.</p></li>
+<li><p><span class="math inline">\(p=100\)</span></p></li>
+</ul>
+<h3 class="unnumbered" id="task-2-blinn-phong-shading-summary">Task 2: Blinn-Phong Shading Summary</h3>
+<p>Suppose:</p>
+<ul>
+<li><p>There is a point light source in the scene at <span class="math inline">\(\mathbf{r}_0\)</span> with intensity <span class="math inline">\(I\)</span>.</p></li>
+<li><p>The observer in the scene is at <span class="math inline">\(\mathbf{r}_c\)</span>.</p></li>
+</ul>
+<p>For any point on the surface of the rendered object with:</p>
+<ul>
+<li><p>position <span class="math inline">\(\mathbf{r}\in\mathbb{R}^3\)</span></p></li>
+<li><p>outward normal <span class="math inline">\(\mathbf{n}\in\partial B(\mathbf{0},1)\)</span></p></li>
+</ul>
+<p>Then the light intensity is given by: <span class="math display">\[k_aI_a + k_d \frac{I}{|\mathbf{r}-\mathbf{r}_0|^2}\max(0,\mathbf{n}\cdot\mathbf{l}) + k_s\frac{I}{|\mathbf{r}-\mathbf{r}_0|^2}(\max(0,\mathbf{n}\cdot\mathbf{h}))^p\]</span> where</p>
+<ul>
+<li><p><span class="math inline">\(\mathbf{l} = \frac{\mathbf{r}_0-\mathbf{r}}{|\mathbf{r}_0-\mathbf{r}|}\)</span></p></li>
+<li><p><span class="math inline">\(\mathbf{v}=\frac{\mathbf{r}_c-\mathbf{r}}{|\mathbf{r}_c-\mathbf{r}|}\)</span></p></li>
+<li><p><span class="math inline">\(\mathbf{h} = \frac{\mathbf{v}+\mathbf{l}}{|\mathbf{v}+\mathbf{l}|}\)</span></p></li>
+<li><p><span class="math inline">\(k_a\)</span>: the ambient reflection coefficient of the surface.</p></li>
+<li><p><span class="math inline">\(I_a\)</span>: the ambient light intensity of the scene.</p></li>
+<li><p><span class="math inline">\(k_d\)</span>: the diffuse reflection coefficient of the surface.</p></li>
+<li><p><span class="math inline">\(k_s\)</span>: the specular reflection coefficient of the surface.</p></li>
+<li><p><span class="math inline">\(p\)</span>: the specular reflection exponent of the surface.</p></li>
+</ul>
+<h2 class="unnumbered" id="task-3-texture-mapping">Task 3: Texture Mapping</h2>
+<p>Suppose:</p>
+<ul>
+<li><p>There is a texture map <span class="math inline">\(f\in(\mathbb{R}^2\to\mathbb{R})\)</span>.</p></li>
+</ul>
+<p>For any point on the surface of the rendered object with:</p>
+<ul>
+<li><p>texture coordinate <span class="math inline">\((u,v)\in\mathbb{R}^2\)</span></p></li>
+</ul>
+<p>The light intensity is given by: <span class="math display">\[f(u,v)\]</span> that is, the sampled texture at the texture coordinate.</p>
+<h2 class="unnumbered" id="task-4-displacement-and-bump-mapping">Task 4: Displacement and Bump Mapping</h2>
+<h3 class="unnumbered" id="task-4.1-bump-mapping">Task 4.1: Bump Mapping</h3>
+<p>Suppose <span class="math inline">\(\mathbf{r}\in\mathbb{R}^3\)</span> is a position on the rendered surface with macro normal <span class="math inline">\(\mathbf{n}\in\partial B(\mathbf{0},1)\)</span> and a unit tangent vector <span class="math inline">\(\mathbf{t}\in\partial B(\mathbf{0},1)\)</span> that is perpendicular to <span class="math inline">\(\mathbf{n}\)</span>. Then <span class="math inline">\((\mathbf{n},\mathbf{t}, \mathbf{n}\times\mathbf{t})\)</span> is an orthonormal basis of <span class="math inline">\(\mathbb{R}^3\)</span>.</p>
+<p>Suppose there is a texture map <span class="math inline">\(h\in (\mathbb{R}^2\to\mathbb{R})\)</span> such that the micro surface height is stored, defined as the height map. Suppose the width and height of the texture map are <span class="math inline">\(w\)</span> and <span class="math inline">\(h\)</span>, respectively. Suppose the texture coordinate of the point is <span class="math inline">\((u,v)\)</span>.</p>
+<p>Then the actual normal is given by: <span class="math display">\[\dfrac{\mathbf{n} - \left(h\left(u+\frac{1}{w}, v\right) -h(u,v)\right)k_hk_n\mathbf{t} - \left(h\left(u, v+\frac{1}{h}\right) - h(u,v)\right)k_hk_n\mathbf{n}\times\mathbf{t}}{\left|\mathbf{n} - \left(h\left(u+\frac{1}{w}, v\right) -h(u,v)\right)k_hk_n\mathbf{t} - \left(h\left(u, v+\frac{1}{h}\right) - h(u,v)\right)k_hk_n\mathbf{n}\times\mathbf{t}\right|}\]</span> where</p>
+<ul>
+<li><p><span class="math inline">\(k_h\)</span>: the height scaling factor</p></li>
+<li><p><span class="math inline">\(k_n\)</span>: the normal scaling factor</p></li>
+</ul>
+<p>Then the light intensity is given by the Blinn-Phong model, where the normal of the surface is given by the expression above.</p>
+<h3 class="unnumbered" id="task-4.1-bump-mapping-summary">Task 4.1: Bump Mapping Summary</h3>
+<p>Suppose:</p>
+<ul>
+<li><p>There is a point light source in the scene at <span class="math inline">\(\mathbf{r}_0\)</span> with intensity <span class="math inline">\(I\)</span>.</p></li>
+<li><p>The observer in the scene is at <span class="math inline">\(\mathbf{r}_c\)</span>.</p></li>
+<li><p><span class="math inline">\(h\in (\mathbb{R}^2\to\mathbb{R})\)</span> is the height map as the texture, and the width and height of the texture map are <span class="math inline">\(w\)</span> and <span class="math inline">\(h\)</span>, respectively.</p></li>
+</ul>
+<p>For any point on the surface of the rendered object with:</p>
+<ul>
+<li><p>position <span class="math inline">\(\mathbf{r}\in\mathbb{R}^3\)</span></p></li>
+<li><p>outward normal <span class="math inline">\(\mathbf{n}\in\partial B(\mathbf{0},1)\)</span></p></li>
+<li><p>unit tangent vector <span class="math inline">\(\mathbf{t}\in\partial B(\mathbf{0},1)\)</span></p></li>
+<li><p>texture coordinate <span class="math inline">\((u,v)\)</span></p></li>
+</ul>
+<p>Then the light intensity is given by: <span class="math display">\[k_aI_a + k_d \frac{I}{|\mathbf{r}-\mathbf{r}_0|^2}\max(0,\mathbf{n}&#39;\cdot\mathbf{l}) + k_s\frac{I}{|\mathbf{r}-\mathbf{r}_0|^2}(\max(0,\mathbf{n}&#39;\cdot\mathbf{h}))^p\]</span> where</p>
+<ul>
+<li><p><span class="math inline">\(\mathbf{n}&#39;=\dfrac{\mathbf{n} - \left(h\left(u+\frac{1}{w}, v\right) -h(u,v)\right)k_hk_n\mathbf{t} - \left(h\left(u, v+\frac{1}{h}\right) - h(u,v)\right)k_hk_n\mathbf{n}\times\mathbf{t}}{\left|\mathbf{n} - \left(h\left(u+\frac{1}{w}, v\right) -h(u,v)\right)k_hk_n\mathbf{t} - \left(h\left(u, v+\frac{1}{h}\right) - h(u,v)\right)k_hk_n\mathbf{n}\times\mathbf{t}\right|}\)</span></p></li>
+<li><p><span class="math inline">\(\mathbf{l} = \frac{\mathbf{r}_0-\mathbf{r}}{|\mathbf{r}_0-\mathbf{r}|}\)</span></p></li>
+<li><p><span class="math inline">\(\mathbf{v}=\frac{\mathbf{r}_c-\mathbf{r}}{|\mathbf{r}_c-\mathbf{r}|}\)</span></p></li>
+<li><p><span class="math inline">\(\mathbf{h} = \frac{\mathbf{v}+\mathbf{l}}{|\mathbf{v}+\mathbf{l}|}\)</span></p></li>
+<li><p><span class="math inline">\(k_a\)</span>: the ambient reflection coefficient of the surface.</p></li>
+<li><p><span class="math inline">\(I_a\)</span>: the ambient light intensity of the scene.</p></li>
+<li><p><span class="math inline">\(k_d\)</span>: the diffuse reflection coefficient of the surface.</p></li>
+<li><p><span class="math inline">\(k_s\)</span>: the specular reflection coefficient of the surface.</p></li>
+<li><p><span class="math inline">\(p\)</span>: the specular reflection exponent of the surface.</p></li>
+<li><p><span class="math inline">\(k_h\)</span>: the height scaling factor</p></li>
+<li><p><span class="math inline">\(k_n\)</span>: the normal scaling factor</p></li>
+</ul>
+<h3 class="unnumbered" id="task-4.2-displacement-mapping">Task 4.2: Displacement Mapping</h3>
+<p>In addition to the calibration in the actual normal direction of the vertices, the position of the vertices are all calibrated.</p>
+<p>Suppose <span class="math inline">\(\mathbf{r}\in\mathbb{R}^3\)</span> is a position on the rendered surface with macro normal <span class="math inline">\(\mathbf{n}\in\partial B(\mathbf{0},1)\)</span>. Suppose there is a texture map <span class="math inline">\(h\in (\mathbb{R}^2\to\mathbb{R})\)</span> such that the micro surface height is stored, defined as the height map. Suppose the width and height of the texture map are <span class="math inline">\(w\)</span> and <span class="math inline">\(h\)</span>, respectively. Suppose the texture coordinate of the point is <span class="math inline">\((u,v)\)</span>. Then the actual position of the vertex is given by: <span class="math display">\[\mathbf{r}+h(u,v)k_h\mathbf{n}\]</span> where</p>
+<ul>
+<li><p><span class="math inline">\(k_h\)</span>: the height scaling factor</p></li>
+</ul>
+<p>Then the light intensity is given by the bump mapping model, where the position of the vertex is given by the adjusted one.</p>
+<h3 class="unnumbered" id="task-4.2-displacement-mapping-summary">Task 4.2: Displacement Mapping Summary</h3>
+<p>Suppose:</p>
+<ul>
+<li><p>There is a point light source in the scene at <span class="math inline">\(\mathbf{r}_0\)</span> with intensity <span class="math inline">\(I\)</span>.</p></li>
+<li><p>The observer in the scene is at <span class="math inline">\(\mathbf{r}_c\)</span>.</p></li>
+<li><p><span class="math inline">\(h\in (\mathbb{R}^2\to\mathbb{R})\)</span> is the height map as the texture, and the width and height of the texture map are <span class="math inline">\(w\)</span> and <span class="math inline">\(h\)</span>, respectively.</p></li>
+</ul>
+<p>For any point on the surface of the rendered object with:</p>
+<ul>
+<li><p>position <span class="math inline">\(\mathbf{r}\in\mathbb{R}^3\)</span></p></li>
+<li><p>outward normal <span class="math inline">\(\mathbf{n}\in\partial B(\mathbf{0},1)\)</span></p></li>
+<li><p>unit tangent vector <span class="math inline">\(\mathbf{t}\in\partial B(\mathbf{0},1)\)</span></p></li>
+<li><p>texture coordinate <span class="math inline">\((u,v)\)</span></p></li>
+</ul>
+<p>Then the light intensity is given by: <span class="math display">\[k_aI_a + k_d \frac{I}{|\mathbf{r}&#39;-\mathbf{r}_0|^2}\max(0,\mathbf{n}&#39;\cdot\mathbf{l}) + k_s\frac{I}{|\mathbf{r}&#39;-\mathbf{r}_0|^2}(\max(0,\mathbf{n}&#39;\cdot\mathbf{h}))^p\]</span> where</p>
+<ul>
+<li><p><span class="math inline">\(\mathbf{r}&#39;=\mathbf{r}+h(u,v)k_h\mathbf{n}\)</span></p></li>
+<li><p><span class="math inline">\(\mathbf{n}&#39;=\dfrac{\mathbf{n} - \left(h\left(u+\frac{1}{w}, v\right) -h(u,v)\right)k_hk_n\mathbf{t} - \left(h\left(u, v+\frac{1}{h}\right) - h(u,v)\right)k_hk_n\mathbf{n}\times\mathbf{t}}{\left|\mathbf{n} - \left(h\left(u+\frac{1}{w}, v\right) -h(u,v)\right)k_hk_n\mathbf{t} - \left(h\left(u, v+\frac{1}{h}\right) - h(u,v)\right)k_hk_n\mathbf{n}\times\mathbf{t}\right|}\)</span></p></li>
+<li><p><span class="math inline">\(\mathbf{l} = \frac{\mathbf{r}_0-\mathbf{r}&#39;}{|\mathbf{r}_0-\mathbf{r}&#39;|}\)</span></p></li>
+<li><p><span class="math inline">\(\mathbf{v}=\frac{\mathbf{r}_c-\mathbf{r}&#39;}{|\mathbf{r}_c-\mathbf{r}&#39;|}\)</span></p></li>
+<li><p><span class="math inline">\(\mathbf{h} = \frac{\mathbf{v}+\mathbf{l}}{|\mathbf{v}+\mathbf{l}|}\)</span></p></li>
+<li><p><span class="math inline">\(k_a\)</span>: the ambient reflection coefficient of the surface.</p></li>
+<li><p><span class="math inline">\(I_a\)</span>: the ambient light intensity of the scene.</p></li>
+<li><p><span class="math inline">\(k_d\)</span>: the diffuse reflection coefficient of the surface.</p></li>
+<li><p><span class="math inline">\(k_s\)</span>: the specular reflection coefficient of the surface.</p></li>
+<li><p><span class="math inline">\(p\)</span>: the specular reflection exponent of the surface.</p></li>
+<li><p><span class="math inline">\(k_h\)</span>: the height scaling factor</p></li>
+<li><p><span class="math inline">\(k_n\)</span>: the normal scaling factor</p></li>
+</ul>
+<h2 class="unnumbered" id="task-5-environment-mapped-reflections">Task 5: Environment-mapped Reflections</h2>
+<p>Suppose:</p>
+<ul>
+<li><p>There is environment light map given by <span class="math inline">\(f\in(\partial B(\mathbf{0},1)\to\mathbb{R})\)</span>.</p></li>
+<li><p>The observer in the scene is at <span class="math inline">\(\mathbf{r}_c\)</span>.</p></li>
+</ul>
+<p>For any point on the surface of the rendered object with:</p>
+<ul>
+<li><p>position <span class="math inline">\(\mathbf{r}\in\mathbb{R}^3\)</span></p></li>
+<li><p>outward normal <span class="math inline">\(\mathbf{n}\in\partial B(\mathbf{0},1)\)</span></p></li>
+</ul>
+<p>The light intensity is given by: <span class="math display">\[f\left(-\frac{\mathbf{r}_c-\mathbf{r}}{|\mathbf{r}_c-\mathbf{r|}} + 2\frac{\mathbf{r}_c-\mathbf{r}}{|\mathbf{r}_c-\mathbf{r|}}\cdot\mathbf{n}\mathbf{n}\right)\]</span> that is, the sampled texture given by the reflected direction of the direction from the point to the camera <span class="math inline">\(\frac{\mathbf{r}_c-\mathbf{r}}{|\mathbf{r}_c-\mathbf{r}|}\)</span></p>
+<h2 class="unnumbered" id="blinn-phong-shading-analysis">Blinn-Phong Shading Analysis</h2>
+<p>The renderings of <code>scene/sphere.json</code> with Blinn-Phong shading at rest state with various terms are included as Fig.<a href="#fig:p5_phong_terms" data-reference-type="ref" data-reference="fig:p5_phong_terms">[fig:p5_phong_terms]</a>.</p>
+<figure>
+<img src="CS 184 HW4 P5 Img Phong All.png" alt="All terms. The entire Blinn-Phong model. " /><figcaption aria-hidden="true">All terms. The entire Blinn-Phong model. </figcaption>
+</figure>
+<figure>
+<img src="CS 184 HW4 P5 Img Phong Ambient.png" alt="Ambient term only" /><figcaption aria-hidden="true">Ambient term only</figcaption>
+</figure>
+<figure>
+<img src="CS 184 HW4 P5 Img Phong Diffuse.png" alt="Diffuse term only" /><figcaption aria-hidden="true">Diffuse term only</figcaption>
+</figure>
+<figure>
+<img src="CS 184 HW4 P5 Img Phong Specular.png" alt="Specular term only" /><figcaption aria-hidden="true">Specular term only</figcaption>
+</figure>
+<h2 class="unnumbered" id="rendering-of-texture-mapping">Rendering of Texture Mapping</h2>
+<p>The rendering of <code>scene/sphere.json</code> with texture mapping of texture <code>textures/custom.png</code> at rest state is included as Fig.<a href="#fig:p5_texture" data-reference-type="ref" data-reference="fig:p5_texture">6</a>.</p>
+<figure>
+<img src="CS 184 HW4 P5 Img Texture.png" id="fig:p5_texture" style="width:80.0%" alt="Rendering of scene/sphere.json with texture mapping of texture textures/custom.png at rest state. " /><figcaption aria-hidden="true">Rendering of <code>scene/sphere.json</code> with texture mapping of texture <code>textures/custom.png</code> at rest state. </figcaption>
+</figure>
+<h2 class="unnumbered" id="rendering-of-bump-mapping-and-displacement-mapping">Rendering of Bump Mapping and Displacement Mapping</h2>
+<p>The renderings of <code>scene/sphere.json</code> of the cloth with bump and displacement mapping of texture <code>textures/texture_3.png</code> at rest state are included as Fig.<a href="#fig:p5_bump_displacement_cloth" data-reference-type="ref" data-reference="fig:p5_bump_displacement_cloth">[fig:p5_bump_displacement_cloth]</a>.</p>
+<p>The normal scaling factor is <span class="math inline">\(100\)</span> and the height scaling factor is <span class="math inline">\(0.04\)</span>.</p>
+<p>The renderings of <code>scene/sphere.json</code> of the sphere with bump and displacement mapping of texture <code>textures/texture_3.png</code> at rest state are included as Fig.<a href="#fig:p5_bump_displacement_sphere" data-reference-type="ref" data-reference="fig:p5_bump_displacement_sphere">[fig:p5_bump_displacement_sphere]</a>.</p>
+<p>The normal scaling factor is <span class="math inline">\(100\)</span> and the height scaling factor is <span class="math inline">\(0.04\)</span>.</p>
+<p>The renderings of <code>scene/sphere.json</code> of the sphere with bump and displacement mapping of texture <code>textures/texture_3.png</code> at rest state with different sphere resolution are included as Fig.<a href="#fig:p5_bump_displacement_resolution" data-reference-type="ref" data-reference="fig:p5_bump_displacement_resolution">[fig:p5_bump_displacement_resolution]</a>.</p>
+<p>The normal scaling factor is <span class="math inline">\(100\)</span> and the height scaling factor is <span class="math inline">\(0.04\)</span>.</p>
+<figure>
+<img src="CS 184 HW4 P5 Img Bump Cloth.png" alt="Bump mapping" /><figcaption aria-hidden="true">Bump mapping</figcaption>
+</figure>
+<figure>
+<img src="CS 184 HW4 P5 Img Displacement Cloth.png" alt="Displacement mapping" /><figcaption aria-hidden="true">Displacement mapping</figcaption>
+</figure>
+<figure>
+<img src="CS 184 HW4 P5 Img Bump Sphere.png" alt="Bump mapping" /><figcaption aria-hidden="true">Bump mapping</figcaption>
+</figure>
+<figure>
+<img src="CS 184 HW4 P5 Img Displacement Sphere.png" alt="Displacement mapping" /><figcaption aria-hidden="true">Displacement mapping</figcaption>
+</figure>
+<figure>
+<img src="CS 184 HW4 P5 Img Bump 16.png" alt="Bump mapping with resolution 16 by 16" /><figcaption aria-hidden="true">Bump mapping with resolution <span class="math inline">\(16\)</span> by <span class="math inline">\(16\)</span></figcaption>
+</figure>
+<figure>
+<img src="CS 184 HW4 P5 Img Bump 128.png" alt="Bump mapping with resolution 128 by 128" /><figcaption aria-hidden="true">Bump mapping with resolution <span class="math inline">\(128\)</span> by <span class="math inline">\(128\)</span></figcaption>
+</figure>
+<figure>
+<img src="CS 184 HW4 P5 Img Displacement 16.png" alt="Displacement mapping with resolution 16 by 16" /><figcaption aria-hidden="true">Displacement mapping with resolution <span class="math inline">\(16\)</span> by <span class="math inline">\(16\)</span></figcaption>
+</figure>
+<figure>
+<img src="CS 184 HW4 P5 Img Displacement 128.png" alt="Displacement mapping with resolution 128 by 128" /><figcaption aria-hidden="true">Displacement mapping with resolution <span class="math inline">\(128\)</span> by <span class="math inline">\(128\)</span></figcaption>
+</figure>
+<p>The difference of the bump mapping and displacement mapping is summarized as follows:</p>
+<ul>
+<li><p>Bump mapping only captures patterns induced by the height map; displacement mapping captures the position change of the point by the height map.</p></li>
+<li><p>High sphere resolution gives a more spherical boundary in both mapping method; low sphere resolution gives sharp corners at the boundary.</p></li>
+<li><p>High sphere resolution gives a more detailed lighting effects, and is improved by displacement mapping.</p></li>
+</ul>
+<h2 class="unnumbered" id="rendering-of-environment-mapped-reflections">Rendering of Environment-mapped Reflections</h2>
+<p>The renderings of <code>scene/sphere.json</code> of both cloth and sphere with environment-mapped reflections at rest state are included as Fig.<a href="#fig:p5_reflect" data-reference-type="ref" data-reference="fig:p5_reflect">[fig:p5_reflect]</a>.</p>
+<figure>
+<img src="CS 184 HW4 P5 Img Mirror Cloth.png" alt="Cloth" /><figcaption aria-hidden="true">Cloth</figcaption>
+</figure>
+<figure>
+<img src="CS 184 HW4 P5 Img Mirror Sphere.png" alt="Sphere" /><figcaption aria-hidden="true">Sphere</figcaption>
+</figure>
+<h1 class="unnumbered" id="collaboration">Collaboration</h1>
+<p>Wenhan Sun and Catherine Gai worked through all the project detail together.</p>
+</body>
 </html>
